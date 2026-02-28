@@ -1,1 +1,1 @@
-{"rewrites":[{"source":"/","destination":"/scheme-checker.html"}]}
+{"rewrites":[{"source":"/(.*?)","destination":"/index.html"}]}
