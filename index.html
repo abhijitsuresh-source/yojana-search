@@ -1297,7 +1297,8 @@ document.addEventListener('DOMContentLoaded', () => {
   syncRefreshBtn();
   initHome();
   const hash = window.location.hash.replace('#', '');
-  if (hash && document.getElementById(`page-${hash}`)) showPage(hash);
+  if (hash && hash !== 'detail' && document.getElementById(`page-${hash}`)) showPage(hash);
+  else showPage('home');
 });
 
 // Event delegation for static buttons (required for sandboxed iframe)
