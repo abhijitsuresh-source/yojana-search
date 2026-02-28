@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YojanaSearch — Find Government Schemes You Qualify For</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --saffron: #FF6B00;
+    --saffron-light: #FF8C35;
+    --saffron-pale: #FFF3EA;
+    --green: #0B6E4F;
+    --green-light: #12A374;
+    --green-pale: #E8F5F0;
+    --navy: #0D1B2A;
+    --navy-mid: #1C3149;
+    --slate: #4A5568;
+    --smoke: #F7F5F2;
+    --white: #FFFFFF;
+    --border: #E2DDD8;
+    --red: #C0392B;
+    --red-pale: #FDEEEC;
+    --amber: #D97706;
+    --amber-pale: #FFFBEB;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(13,27,42,0.08);
+    --shadow-lg: 0 12px 48px rgba(13,27,42,0.14);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--smoke); color: var(--navy); min-height: 100vh; line-height: 1.6; }
+  nav { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(13,27,42,0.06); }
+  .logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--navy); letter-spacing: -0.5px; cursor: pointer; }
+  .logo span { color: var(--saffron); }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-btn { padding: 8px 18px; border-radius: 50px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
+  .nav-btn.outline { background: transparent; border: 1.5px solid var(--border); color: var(--slate); }
+  .nav-btn.outline:hover { border-color: var(--saffron); color: var(--saffron); }
+  .nav-btn.primary { background: var(--saffron); color: white; }
+  .nav-btn.primary:hover { background: var(--saffron-light); }
+  .hero { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #0B3D2E 100%); padding: 80px 24px 100px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+  .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,107,0,0.15); border: 1px solid rgba(255,107,0,0.3); color: var(--saffron-light); padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 500; margin-bottom: 24px; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(32px, 5vw, 56px); font-weight: 900; color: white; line-height: 1.15; margin-bottom: 20px; max-width: 700px; margin-left: auto; margin-right: auto; }
+  .hero h1 em { font-style: normal; color: var(--saffron-light); }
+  .hero p { color: rgba(255,255,255,0.7); font-size: 18px; max-width: 500px; margin: 0 auto 40px; font-weight: 300; }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-hero-primary { background: var(--saffron); color: white; padding: 16px 32px; border-radius: 50px; font-size: 16px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 20px rgba(255,107,0,0.4); }
+  .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,107,0,0.5); }
+  .btn-hero-secondary { background: rgba(255,255,255,0.1); color: white; padding: 16px 32px; border-radius: 50px; font-size: 16px; font-weight: 500; border: 1.5px solid rgba(255,255,255,0.2); cursor: pointer; transition: all 0.2s; }
+  .btn-hero-secondary:hover { background: rgba(255,255,255,0.18); }
+  .stats-bar { background: white; border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--saffron); }
+  .stat-label { font-size: 12px; color: var(--slate); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+  .main { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+  .section-header { margin-bottom: 32px; }
+  .section-header h2 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .section-header p { color: var(--slate); font-size: 15px; }
+  .scheme-list { display: flex; flex-direction: column; gap: 12px; }
+  .scheme-card { background: white; border: 1.5px solid var(--border); border-radius: 12px; padding: 20px 24px; cursor: pointer; transition: all 0.2s; display: flex; align-items: flex-start; gap: 16px; }
+  .scheme-card:hover { border-color: var(--saffron); box-shadow: var(--shadow); transform: translateY(-1px); }
+  .scheme-icon-wrap { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .scheme-info { flex: 1; }
+  .scheme-name { font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+  .scheme-tagline { font-size: 13px; color: var(--slate); margin-bottom: 8px; }
+  .scheme-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { padding: 3px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+  .tag-cash { background: #E8F5F0; color: var(--green); }
+  .tag-loan { background: #EEF2FF; color: #4F46E5; }
+  .tag-insurance { background: #FEF3C7; color: #92400E; }
+  .tag-subsidy { background: #FCE7F3; color: #9D174D; }
+  .tag-account { background: #F0FDF4; color: #166534; }
+  .scheme-arrow { color: var(--border); font-size: 20px; align-self: center; }
+  .quiz-container { max-width: 600px; margin: 0 auto; }
+  .quiz-progress { display: flex; gap: 4px; margin-bottom: 32px; }
+  .progress-dot { height: 4px; flex: 1; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+  .progress-dot.done { background: var(--saffron); }
+  .progress-dot.active { background: var(--saffron-light); }
+  .quiz-card { background: white; border-radius: 20px; padding: 40px 36px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); animation: slideIn 0.3s ease; }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  .quiz-step-label { font-size: 12px; font-weight: 600; color: var(--saffron); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .quiz-question { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 8px; line-height: 1.3; }
+  .quiz-hint { font-size: 14px; color: var(--slate); margin-bottom: 28px; }
+  .options-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 28px; }
+  .options-grid.two-col { grid-template-columns: 1fr 1fr; }
+  .option-btn { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border: 1.5px solid var(--border); border-radius: 12px; background: white; font-size: 15px; font-family: 'DM Sans', sans-serif; color: var(--navy); cursor: pointer; transition: all 0.18s; text-align: left; font-weight: 400; }
+  .option-btn:hover { border-color: var(--saffron); background: var(--saffron-pale); }
+  .option-btn.selected { border-color: var(--saffron); background: var(--saffron-pale); color: var(--saffron); font-weight: 600; }
+  .option-emoji { font-size: 20px; flex-shrink: 0; }
+  .quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .btn-back { background: none; border: 1.5px solid var(--border); color: var(--slate); padding: 10px 20px; border-radius: 50px; font-size: 14px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+  .btn-back:hover { border-color: var(--saffron); color: var(--saffron); }
+  .btn-next { background: var(--saffron); color: white; padding: 12px 28px; border-radius: 50px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .btn-next:hover { background: var(--saffron-light); }
+  .quiz-input, .quiz-select { width: 100%; padding: 14px 18px; border: 2px solid var(--border); border-radius: 12px; font-size: 16px; font-family: 'DM Sans', sans-serif; color: var(--navy); outline: none; background: white; margin-bottom: 28px; transition: border 0.2s; }
+  .quiz-input:focus, .quiz-select:focus { border-color: var(--saffron); }
+  .results-header { background: linear-gradient(135deg, var(--green) 0%, #0B5A3F 100%); border-radius: 20px; padding: 36px; color: white; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .results-header::after { content: '🎯'; position: absolute; right: 32px; top: 50%; transform: translateY(-50%); font-size: 72px; opacity: 0.15; pointer-events: none; }
+  .results-header h2 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .results-header p { opacity: 0.8; font-size: 15px; }
+  .results-count { font-size: 48px; font-family: 'Playfair Display', serif; font-weight: 900; }
+  .certainty-section { margin-bottom: 36px; }
+  .certainty-label { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .certainty-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .dot-high { background: var(--green-light); }
+  .dot-medium { background: var(--amber); }
+  .dot-check { background: #999; }
+  .certainty-title { font-size: 15px; font-weight: 700; color: var(--navy); }
+  .certainty-sub { font-size: 13px; color: var(--slate); }
+  .result-scheme-card { background: white; border: 1.5px solid var(--border); border-radius: 14px; padding: 20px 24px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 16px; }
+  .result-scheme-card:hover { border-color: var(--green-light); box-shadow: var(--shadow); }
+  .result-scheme-card.high { border-left: 4px solid var(--green-light); }
+  .result-scheme-card.medium { border-left: 4px solid var(--amber); }
+  .result-scheme-card.check { border-left: 4px solid #999; }
+  .detail-back { display: flex; align-items: center; gap: 8px; color: var(--slate); font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 24px; background: none; border: none; padding: 0; transition: color 0.2s; }
+  .detail-back:hover { color: var(--saffron); }
+  .detail-hero { border-radius: 20px; padding: 36px; margin-bottom: 24px; color: white; }
+  .detail-hero h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .detail-hero .tagline { opacity: 0.85; font-size: 16px; margin-bottom: 16px; }
+  .detail-benefit-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 50px; font-size: 14px; font-weight: 600; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  @media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } }
+  .detail-section { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .detail-section h3 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--slate); margin-bottom: 16px; }
+  .elig-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F0EDE8; }
+  .elig-row:last-child { border-bottom: none; }
+  .elig-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .elig-text { flex: 1; }
+  .elig-label { font-size: 14px; font-weight: 600; color: var(--navy); }
+  .elig-reason { font-size: 13px; color: var(--slate); margin-top: 4px; line-height: 1.55; }
+  .elig-fix { font-size: 12px; color: var(--green); font-weight: 600; margin-top: 6px; background: var(--green-pale); padding: 6px 10px; border-radius: 6px; line-height: 1.5; }
+  .gap-banner { border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; }
+  .gap-banner.fail { background: var(--red-pale); border: 1.5px solid #FCCAC4; }
+  .gap-banner.pass { background: var(--green-pale); border: 1.5px solid #A7E9CE; }
+  .gap-banner.partial { background: var(--amber-pale); border: 1.5px solid #FCD34D; }
+  .gap-banner h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .gap-banner.fail h3 { color: var(--red); }
+  .gap-banner.pass h3 { color: var(--green); }
+  .gap-banner.partial h3 { color: var(--amber); }
+  .gap-banner p { font-size: 14px; color: var(--slate); line-height: 1.6; }
+  .doc-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F0EDE8; align-items: flex-start; }
+  .doc-item:last-child { border-bottom: none; }
+  .doc-num { width: 24px; height: 24px; border-radius: 50%; background: var(--saffron-pale); color: var(--saffron); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .doc-name { font-size: 14px; font-weight: 600; color: var(--navy); }
+  .doc-desc { font-size: 12px; color: var(--slate); line-height: 1.5; margin-top: 2px; }
+  .search-wrap { position: relative; margin-bottom: 24px; }
+  .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 18px; }
+  .search-input { width: 100%; padding: 14px 18px 14px 46px; border: 2px solid var(--border); border-radius: 12px; font-size: 15px; font-family: 'DM Sans', sans-serif; color: var(--navy); outline: none; background: white; transition: border 0.2s; }
+  .search-input:focus { border-color: var(--saffron); }
+  .apply-btn { display: block; width: 100%; background: var(--green); color: white; padding: 16px; border-radius: 12px; text-align: center; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; margin-top: 8px; }
+  .apply-btn:hover { background: var(--green-light); }
+  .check-my-btn { background: var(--saffron-pale); color: var(--saffron); border: 1.5px solid var(--saffron); padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; margin-top: 8px; }
+  .check-my-btn:hover { background: var(--saffron); color: white; }
+  .page { display: none; }
+  .page.active { display: block; }
+  footer { background: var(--navy); color: rgba(255,255,255,0.5); text-align: center; padding: 24px; font-size: 13px; margin-top: 80px; }
+  footer a { color: var(--saffron-light); text-decoration: none; }
+  .ad-placeholder { background: #F0EDE8; border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; color: var(--slate); font-size: 13px; margin: 24px 0; }
+  .coverage-note { background: #FFF8F0; border: 1px solid #FFD9B3; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #7C4A00; margin-top: 14px; line-height: 1.6; }
+  .coverage-note strong { font-weight: 700; }
+  @media (max-width: 600px) {
+    .hero { padding: 60px 20px 80px; }
+    .stats-bar { gap: 24px; }
+    .quiz-card { padding: 28px 20px; }
+    .options-grid.two-col { grid-template-columns: 1fr; }
+    nav { padding: 0 16px; }
+    .logo { font-size: 18px; }
+    .detail-hero { padding: 24px 20px; }
+    .detail-hero h1 { font-size: 22px; }
+  }
+
+  .btn-reset {
+    position: absolute; top: 16px; right: 20px;
+    background: none; border: none; color: var(--slate);
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; opacity: 0.65;
+    padding: 4px 8px; border-radius: 20px; transition: all 0.2s;
+  }
+  .btn-reset:hover { opacity: 1; color: var(--saffron); }
+  .quiz-card { position: relative; }
+  .detail-topbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:4px; }
+  .detail-topbar-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  /* ── Paywall ─────────────────────────────────────────── */
+  .paywall-wrap { position: relative; }
+  .paywall-blur { filter: blur(5px) brightness(0.92); pointer-events: none; user-select: none; }
+  .paywall-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(2px);
+    border-radius: 16px;
+    z-index: 10;
+    text-align: center;
+    padding: 24px;
+  }
+  .paywall-lock { font-size: 40px; margin-bottom: 10px; }
+  .paywall-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .paywall-sub { font-size: 14px; color: var(--slate); margin-bottom: 20px; line-height: 1.5; max-width: 260px; }
+  .paywall-btn {
+    background: var(--saffron); color: white;
+    border: none; border-radius: 50px;
+    padding: 13px 28px; font-size: 15px; font-weight: 700;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    box-shadow: 0 4px 16px rgba(255,107,0,0.35);
+    transition: all 0.2s;
+  }
+  .paywall-btn:hover { background: var(--saffron-light); transform: translateY(-1px); }
+  .paywall-note { font-size: 12px; color: var(--slate); margin-top: 10px; }
+  /* Edit answers button */
+  .edit-answers-btn {
+    background: none; border: 1.5px solid var(--border);
+    color: var(--slate); border-radius: 50px;
+    padding: 8px 18px; font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .edit-answers-btn:hover { border-color: var(--saffron); color: var(--saffron); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" data-action="showPage:home">Yojana<span>Search</span></div>
+  <div class="nav-links">
+    <button class="nav-btn outline" data-action="showPage:browse">Browse</button>
+    <button class="nav-btn outline" onclick="resetQuestionnaire()" id="nav-refresh-btn" style="display:none">🔄 Refresh</button>
+    <button class="nav-btn primary" data-action="startQuestionnaire">Check Eligibility</button>
+  </div>
+</nav>
+
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-badge">🇮🇳 All India — Free to Use</div>
+    <h1>Find Government Schemes<br><em>You Actually Qualify For</em></h1>
+    <p>Answer a few simple questions and instantly discover which central government benefits, loans, and insurance you're eligible for.</p>
+    <div class="hero-actions">
+      <button class="btn-hero-primary" data-action="startQuestionnaire">Check My Eligibility →</button>
+      <button class="btn-hero-secondary" data-action="showPage:browse">Browse All Schemes</button>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">10</div><div class="stat-label">Top Schemes</div></div>
+    <div class="stat"><div class="stat-num">₹5L+</div><div class="stat-label">Max Benefit</div></div>
+    <div class="stat"><div class="stat-num">500M+</div><div class="stat-label">People Covered</div></div>
+    <div class="stat"><div class="stat-num">2 min</div><div class="stat-label">To Get Results</div></div>
+  </div>
+  <div class="main">
+    <div class="section-header">
+      <h2>Top 10 Government Schemes</h2>
+      <p>The highest-impact central government schemes covering health, farming, business, housing, and financial security</p>
+    </div>
+    <div class="scheme-list" id="all-schemes-home"></div>
+    <div class="ad-placeholder">📢 Advertisement — Google AdSense</div>
+  </div>
+</div>
+
+<div id="page-browse" class="page">
+  <div class="main">
+    <button class="detail-back" data-action="showPage:home">← Back to Home</button>
+    <div class="section-header">
+      <h2>All Schemes</h2>
+      <p>Browse all 10 schemes — click any for full details and eligibility gap analysis</p>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" placeholder="Search by scheme name or keyword..." oninput="filterSchemes(this.value)" id="scheme-search">
+    </div>
+    <div class="scheme-list" id="browse-schemes"></div>
+  </div>
+</div>
+
+<div id="page-quiz" class="page">
+  <div class="main">
+    <div class="quiz-container" id="quiz-container"></div>
+  </div>
+</div>
+
+<div id="page-results" class="page">
+  <div class="main" id="results-content"></div>
+</div>
+
+<div id="page-detail" class="page">
+  <div class="main" id="detail-content"></div>
+</div>
+
+<footer>
+  <p>YojanaSearch is an independent information service. Always verify eligibility on official government portals before applying.</p>
+  <p style="margin-top:8px">Data sourced from official scheme guidelines and <a href="https://myscheme.gov.in" target="_blank">myScheme.gov.in</a>. Last updated February 2026.</p>
+</footer>
+
+<script>
+// ============================================================
+// TOP 10 SCHEMES — FULLY RESEARCHED ELIGIBILITY CONDITIONS
+// ============================================================
+const SCHEMES = [
+
+{
+  id: 'pm-kisan',
+  name: 'PM Kisan Samman Nidhi',
+  tagline: '₹6,000 per year direct cash to landowning farmers',
+  category: 'Agriculture',
+  benefitType: 'cash',
+  benefitAmount: '₹6,000/year in 3 instalments of ₹2,000',
+  icon: '🌾',
+  iconBg: '#E8F5E9',
+  bgGradient: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+  description: 'PM Kisan gives ₹6,000 per year to farmer families who own and cultivate agricultural land. The money is paid in three instalments of ₹2,000 each — approximately in April, August, and December — directly into the farmer\'s Aadhaar-linked bank account. No middlemen. Over 110 million farmer families are registered.',
+  coverageNote: 'Farmer families owning agricultural land in both rural and urban areas are eligible — not just village farmers.',
+  applyUrl: 'https://pmkisan.gov.in',
+  conditions: [
+    { param: 'occupation', op: 'in', value: ['farmer_own'], label: 'Must be a farmer who owns agricultural land', reason: 'Only landowning farmers qualify. Tenant farmers, sharecroppers, and agricultural labourers are not eligible because the scheme is linked to land records. The land must appear in your name (or jointly with family) in official land records.', fixable: false },
+    { param: 'income', op: 'lte', value: 200000, label: 'Annual non-agricultural income must be below ₹2 lakh', reason: 'Farmers who earn more than ₹2 lakh per year from non-agricultural sources (salary, business, rent) are excluded. Agricultural income itself is not counted toward this limit.', fixable: false },
+    { param: 'not_govt_employee', op: 'custom', value: true, label: 'Must NOT be a current/retired government employee or pensioner', reason: 'Serving or retired central/state/PSU employees and pensioners (except Class IV/Group D employees earning below ₹10,000/month) are excluded. Multi-tasking staff of central/state government are also excluded.', fixable: false },
+    { param: 'not_income_taxpayer', op: 'custom', value: true, label: 'Must NOT have paid income tax in the previous assessment year', reason: 'Anyone who filed an income tax return is excluded — even if they own farmland. This is one of the most commonly overlooked exclusion criteria.', fixable: false },
+    { param: 'not_professional', op: 'custom', value: true, label: 'Must NOT be a registered doctor, lawyer, CA, engineer, or architect', reason: 'Licensed professionals in these five fields are excluded regardless of their farming activity, as they have adequate other income.', fixable: false },
+    { param: 'hasLand', op: 'eq', value: true, label: 'Must own land registered in your name or family member\'s name', reason: 'The scheme is linked to land records. Institutional landholders (companies, trusts, cooperative societies, NGOs) are not eligible. Only individual or joint family ownership qualifies.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Mandatory — payment is DBT to Aadhaar-linked account' },
+    { name: 'Land Records (Khatoni/Patta/7/12 extract)', desc: 'Proof of land ownership — name in records must match Aadhaar' },
+    { name: 'Bank Account linked to Aadhaar', desc: 'Savings account at any bank — must be seeded with Aadhaar' },
+    { name: 'Mobile Number', desc: 'For OTP during registration and SMS alerts for each instalment' },
+    { name: 'Self-Declaration Form', desc: 'Declaring that you and your family do not fall in any exclusion category' }
+  ],
+  steps: [
+    'Go to pmkisan.gov.in and click "New Farmer Registration" (or visit your nearest CSC)',
+    'Select Rural or Urban Farmer and enter your Aadhaar number',
+    'Enter your state, district, sub-district, block, and village',
+    'Enter your bank account number and IFSC code',
+    'Upload your land ownership documents',
+    'Submit self-declaration that you\'re not in any exclusion category',
+    'State/district authorities verify your documents (may take 4–12 weeks)',
+    'After approval, your name is added to the beneficiary list and the next instalment is credited'
+  ]
+},
+
+{
+  id: 'ayushman-bharat',
+  name: 'Ayushman Bharat PM-JAY',
+  tagline: '₹5 lakh free health insurance per family per year',
+  category: 'Health',
+  benefitType: 'insurance',
+  benefitAmount: '₹5 lakh/year — all hospitalisation',
+  icon: '🏥',
+  iconBg: '#FCE4EC',
+  bgGradient: 'linear-gradient(135deg, #880E4F, #AD1457)',
+  description: 'Ayushman Bharat gives every eligible family ₹5 lakh per year for completely free hospitalisation at any government hospital or 25,000+ empanelled private hospitals across India. Covers 1,949 medical procedures including cancer treatment, heart surgery, kidney dialysis, organ transplants, and childbirth. No premium to pay — fully government funded. The benefit is per family, not per person.',
+  coverageNote: 'Eligibility is based on SECC-2011 survey data. Many families are eligible even without a BPL card. Always check at pmjay.gov.in before assuming you don\'t qualify.',
+  applyUrl: 'https://pmjay.gov.in',
+  conditions: [
+    { param: 'rationCard', op: 'in', value: ['AAY', 'BPL', 'NFSA'], label: 'Must hold AAY, BPL, or NFSA/Priority Household ration card', reason: 'Primary eligibility is based on SECC-2011 database which corresponds mainly to AAY and BPL card holders and NFSA Priority Household beneficiaries. However, many families without formal BPL cards are still listed in SECC-2011 — check pmjay.gov.in to verify.', fixable: true, fixNote: 'Check your eligibility at pmjay.gov.in by entering your mobile number and OTP. Many families are eligible based on SECC-2011 data even without a ration card. Call helpline 14555 for help.' },
+    { param: 'income', op: 'lte', value: 300000, label: 'Family income should be low-to-middle (no strict cut-off, but targets bottom 50%)', reason: 'While there\'s no single income threshold, the scheme targets approximately the bottom 50% of India\'s population by socio-economic status as captured in SECC-2011. Families with consistently high incomes were not surveyed as beneficiaries.', fixable: false },
+    { param: 'not_govt_employee', op: 'custom', value: true, label: 'Central/state government employees with existing health coverage are excluded', reason: 'Employees covered under CGHS (Central Government Health Scheme), ECHS (ex-servicemen), or equivalent state government health insurance are excluded as they already have coverage.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Required at hospital for identity verification and treatment authorisation' },
+    { name: 'Ration Card (AAY/BPL/NFSA)', desc: 'Helps establish SECC eligibility. Even without this, check on pmjay.gov.in' },
+    { name: 'Ayushman Card (PM-JAY Card / Golden Card)', desc: 'Get this made FREE at any CSC, government hospital, or Ayushman Mitra counter. Carry it when hospitalised.' },
+    { name: 'Mobile Number registered with Aadhaar', desc: 'For OTP during card generation and claim processing' }
+  ],
+  steps: [
+    'First, check eligibility: visit pmjay.gov.in or call 14555 (toll free)',
+    'If eligible, visit your nearest Common Service Centre (CSC), government hospital, or Ayushman Mitra',
+    'Get your Ayushman Card (PM-JAY Card) made — completely free',
+    'When hospitalisation is needed, go to any empanelled hospital (search list at pmjay.gov.in)',
+    'Show Ayushman Card at the hospital\'s "Ayushman Mitra" help desk',
+    'Hospital verifies your eligibility electronically — no paperwork from you',
+    'All treatment, medicines, and hospital charges are completely free up to ₹5 lakh',
+    'Hospital raises claim directly with the government after discharge'
+  ]
+},
+
+{
+  id: 'pm-mudra',
+  name: 'PM Mudra Yojana',
+  tagline: 'Collateral-free business loans up to ₹10 lakh for micro enterprises',
+  category: 'Loans & Credit',
+  benefitType: 'loan',
+  benefitAmount: 'Up to ₹10 lakh — zero collateral required',
+  icon: '💼',
+  iconBg: '#FFF3E0',
+  bgGradient: 'linear-gradient(135deg, #BF360C, #E65100)',
+  description: 'PM Mudra gives collateral-free loans through banks and MFIs to micro business owners. Three categories: Shishu (up to ₹50,000) for starting out, Kishor (₹50,001–₹5 lakh) for growing businesses, Tarun (₹5 lakh–₹10 lakh) for established ones. Covers manufacturing, trading, services, artisans, food processing, transport, repair shops, beauty parlours, street vendors — any non-farm micro business. Apply at any bank. No collateral required for any category.',
+  coverageNote: 'One of India\'s most widely availed loan schemes. Any Indian running or wanting to start a small non-agricultural business can apply at any bank.',
+  applyUrl: 'https://mudra.org.in',
+  conditions: [
+    { param: 'occupation', op: 'in', value: ['self_employed','street_vendor','artisan','homemaker','unemployed','daily_wage'], label: 'Must be running or planning a non-agricultural micro/small business', reason: 'Mudra covers all non-farm micro enterprises: shops, kiosks, manufacturing units, service providers, artisans, vendors, repair shops, food processors, transport operators, etc. Purely agricultural businesses don\'t qualify (use KCC or NABARD schemes instead). New businesses and existing ones both qualify.', fixable: false },
+    { param: 'age', op: 'between', value: [18, 65], label: 'Age between 18 and 65 years', reason: 'Standard bank lending eligibility. Some lenders may allow up to 70 with a guarantor.', fixable: false },
+    { param: 'not_defaulter', op: 'custom', value: true, label: 'Must NOT be a wilful loan defaulter', reason: 'Banks will reject Mudra applications if you have unpaid/defaulted loans. Check your CIBIL score before applying. Minor dues of under ₹500 are typically waived — but large defaults will disqualify you.', fixable: true, fixNote: 'Check your CIBIL score free at paisabazaar.com. If you have a default, negotiate a settlement with the lender, get a NOC, and wait 6–12 months before reapplying.' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Primary identity document' },
+    { name: 'PAN Card', desc: 'Required for loans above ₹50,000 — apply at nsdl.co.in if you don\'t have one' },
+    { name: 'Passport-size Photographs', desc: '2 recent colour photographs' },
+    { name: 'Address Proof', desc: 'Aadhaar, utility bill, or rental agreement' },
+    { name: 'Business Proof / Plan', desc: 'For Kishor/Tarun: GST registration, Udyam certificate, or written business plan. For Shishu: a basic description of your business is enough.' },
+    { name: 'Bank Statements', desc: 'Last 6 months for existing businesses (Kishor and Tarun). Not required for Shishu.' },
+    { name: 'Caste Certificate', desc: 'If SC/ST/OBC — may get priority processing and lower interest rates in some states' }
+  ],
+  steps: [
+    'Decide which category you need: Shishu (≤₹50K), Kishor (₹50K–5L), or Tarun (₹5L–10L)',
+    'Visit any scheduled commercial bank, regional rural bank, MFI, or NBFC near you',
+    'Ask for the Mudra loan application form — it is completely free to apply',
+    'For Shishu: minimal documentation, decisions often within 1–3 days',
+    'For Kishor/Tarun: submit business proof, bank statements, and purpose of loan',
+    'Bank evaluates your application — no collateral required',
+    'Upon approval, you receive a Mudra Card (prepaid debit card) to draw funds as needed',
+    'Repay via monthly EMI — no prepayment penalty on most Mudra loans'
+  ]
+},
+
+{
+  id: 'pmay-gramin',
+  name: 'PM Awas Yojana — Gramin',
+  tagline: '₹1.2–1.3 lakh grant to build a pucca house in rural areas',
+  category: 'Housing',
+  benefitType: 'cash',
+  benefitAmount: '₹1,20,000 (plain areas) / ₹1,30,000 (hilly/NE states)',
+  icon: '🏠',
+  iconBg: '#E3F2FD',
+  bgGradient: 'linear-gradient(135deg, #0D47A1, #1565C0)',
+  description: 'PMAY-G gives homeless rural families or those living in kutcha (mud/thatch) houses a government grant to build a pucca (permanent) house. In addition to the housing grant, you also get: ₹12,000 for building a toilet (Swachh Bharat Mission), 90 days of MGNREGS labour wages for construction work, and ₹70,000 extra loan from banks if needed. Money is released in stages as construction progresses — verified by geotagged photos.',
+  coverageNote: 'Beneficiary selection is from the SECC-2011 waitlist maintained by Gram Panchayats. State governments add new names periodically. Contact your BDO or GP if your name is not found.',
+  applyUrl: 'https://pmayg.nic.in',
+  conditions: [
+    { param: 'area', op: 'eq', value: 'rural', label: 'Must live in a rural area (village)', reason: 'PMAY-G is exclusively for rural residents. If you live in a city or town, apply under PMAY-Urban instead.', fixable: false },
+    { param: 'houseCondition', op: 'custom', value: true, label: 'Must be homeless OR living in a kutcha house with 0, 1, or 2 rooms', reason: 'People already living in a pucca house with 2 or more rooms are excluded. The scheme targets those with no house or with severely inadequate housing. Assessment is done by Gram Panchayat using SECC data.', fixable: false },
+    { param: 'income', op: 'lte', value: 200000, label: 'Income should be low — typically below ₹2 lakh (SECC-defined poor)', reason: 'Beneficiaries are selected from SECC-2011 Awaiting List based on deprivation and exclusion criteria. High-income families were auto-excluded from the SECC survey.', fixable: false },
+    { param: 'secc_listed', op: 'custom', value: true, label: 'Family must be listed in SECC-2011 housing waitlist', reason: 'Beneficiaries are primarily selected from the SECC-2011 Permanent Waitlist (PWL). Selection order follows deprivation scores — SC/ST, widows, persons with disabilities, released bonded labour, and PMAY-G priority categories get priority.', fixable: true, fixNote: 'Check if your name is in the waitlist at pmayg.nic.in. If not found, approach your Gram Panchayat or Block Development Office (BDO). New survey rounds add eligible families periodically.' },
+    { param: 'not_prev_beneficiary', op: 'custom', value: true, label: 'Must NOT have previously received PMAY-G or Indira Awas Yojana benefit', reason: 'This benefit can only be received once per family. Previous beneficiaries of IAY (the earlier housing scheme) or PMAY-G are ineligible.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card (all adult family members)', desc: 'Mandatory for all adults in the household — payment is DBT' },
+    { name: 'MGNREGS Job Card', desc: 'Required to claim 90 days of free labour support for construction' },
+    { name: 'Bank Account (Aadhaar-linked)', desc: 'All instalments are transferred electronically in stages' },
+    { name: 'Land Ownership Document', desc: 'Proof that you own the land on which the house will be built — or a GP-verified land declaration' },
+    { name: 'BPL / SECC Inclusion Proof', desc: 'GP printout or certificate showing your family is on the waitlist' }
+  ],
+  steps: [
+    'Check if your family is in the beneficiary waitlist at pmayg.nic.in (search by name, Aadhaar, or mobile)',
+    'If listed, your Gram Panchayat will notify you when your turn comes — do not pay anyone to "help" you get selected',
+    'Gram Sabha (village assembly) formally approves your selection',
+    'First instalment: ₹40,000 released after geo-tagged photo of your land/old structure',
+    'Second instalment: ₹40,000 released after construction reaches lintel (door/window frame) level',
+    'Third instalment: ₹40,000 released after roof is completed and occupation certificate issued',
+    '₹12,000 for toilet released separately in 2 instalments',
+    'MGNREGS wages for 90 days credited directly as you work on construction'
+  ]
+},
+
+{
+  id: 'pm-jan-dhan',
+  name: 'PM Jan Dhan Yojana',
+  tagline: 'Free zero-balance bank account with insurance and overdraft',
+  category: 'Financial',
+  benefitType: 'account',
+  benefitAmount: 'Free account + ₹2L insurance + ₹10K overdraft',
+  icon: '🏦',
+  iconBg: '#E8F5E9',
+  bgGradient: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+  description: 'Jan Dhan opens a free zero-balance savings account at any bank for every Indian adult who doesn\'t have one. Comes with: a free RuPay debit card, ₹2 lakh free accidental death insurance, ₹30,000 life insurance (accounts opened before 2015), and an overdraft of up to ₹10,000 after 6 months of active operation. Most importantly, without a bank account, you cannot receive any government scheme benefits — this is the gateway to everything.',
+  coverageNote: 'Any Indian adult without a bank account can open a Jan Dhan account. No minimum balance, no account maintenance fee, no charges ever.',
+  applyUrl: 'https://pmjdy.gov.in',
+  conditions: [
+    { param: 'age', op: 'gte', value: 18, label: 'Must be 18 years or older (10+ with guardian)', reason: 'Adults 18+ can open independently. Children aged 10–17 can open with a guardian\'s co-signature.', fixable: false },
+    { param: 'no_existing_account', op: 'custom', value: true, label: 'Primarily for people without an existing bank account', reason: 'While you can technically open a Jan Dhan account even if you have another account, the scheme is designed for the unbanked. Banks may ask if you have another account. If you do, a normal savings account may be more suitable.', fixable: false },
+    { param: 'indian_resident', op: 'custom', value: true, label: 'Must be an Indian resident (any document accepted)', reason: 'Even if you have no documents at all, banks must allow you to open a "Small Account" with just your photo and self-certification. Valid for 1 year, extendable. Aadhaar enables the full account instantly.', fixable: true, fixNote: 'If you don\'t have any ID, walk into any bank and say you want to open a "Small Account" under Jan Dhan — the bank cannot refuse. Your account can be upgraded once you get Aadhaar.' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Preferred document — opens full account with all benefits immediately' },
+    { name: 'OR: Any ONE of these alternatives', desc: 'Voter ID, Driving Licence, NREGA Job Card, PAN Card, Passport, or Government letter with photo — any one is sufficient' },
+    { name: '1–2 Passport-size Photographs', desc: 'Recent colour photographs' },
+    { name: 'NO minimum balance needed', desc: 'Account can be opened with zero rupees. There are never any charges for maintaining zero balance.' }
+  ],
+  steps: [
+    'Walk into any bank branch with your Aadhaar card (or any other valid ID) and 1–2 photos',
+    'Tell the bank officer: "I want to open a Jan Dhan account"',
+    'Fill the simple account opening form (staff will assist)',
+    'Get your passbook — account is active the same day',
+    'Your RuPay debit card is mailed to you within 2 weeks',
+    'Immediately link your Aadhaar to the account — all government scheme payments (PM Kisan, PMJJBY, etc.) will come here',
+    'After 6 months of regular use, you become eligible for ₹10,000 overdraft (interest-free for women)'
+  ]
+},
+
+{
+  id: 'pmjjby',
+  name: 'PM Jeevan Jyoti Bima Yojana',
+  tagline: '₹2 lakh life insurance for your family — only ₹436 per year',
+  category: 'Financial',
+  benefitType: 'insurance',
+  benefitAmount: '₹2 lakh paid to family on death',
+  icon: '🛡️',
+  iconBg: '#FEF3C7',
+  bgGradient: 'linear-gradient(135deg, #78350F, #92400E)',
+  description: 'PMJJBY is a renewable 1-year term life insurance scheme. Your family receives ₹2 lakh if you die — from any cause, at any time of day, from any disease or accident. The premium is just ₹436 per year (about ₹1.20 per day), automatically deducted from your bank account every year. No medical tests. No agent needed. Enroll at your bank in 5 minutes.',
+  coverageNote: 'This is India\'s most affordable life insurance. Enroll any time between 1st June and 31st May. Takes effect same day. Often taken together with PMSBY for complete coverage at ₹456/year total.',
+  applyUrl: 'https://jansuraksha.gov.in',
+  conditions: [
+    { param: 'age', op: 'between', value: [18, 50], label: 'Age between 18 and 50 years at time of enrollment', reason: 'You can enroll only between ages 18 and 50. Once enrolled, you can renew until age 55. After 55, you must exit PMJJBY — but you can still have PMSBY (which allows up to 70). This age cap keeps the premium low for everyone.', fixable: false },
+    { param: 'bankAccount', op: 'custom', value: true, label: 'Must have a bank account with sufficient balance for auto-debit', reason: 'The ₹436 premium is auto-debited from your savings account every year on or before June 1. If your account doesn\'t have ₹436 on that date, the policy lapses and you lose coverage until you re-enroll next year.', fixable: true, fixNote: 'Open a Jan Dhan account at any bank — free, same-day, zero balance. Once active, you can enroll for PMJJBY that same day.' },
+    { param: 'health_declaration', op: 'custom', value: true, label: 'Must self-declare good health at time of enrollment', reason: 'No medical tests required. But you must sign a declaration that you are in good health. Deliberately hiding a serious illness that later causes death may result in claim rejection.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Identity linked to bank account — both required' },
+    { name: 'Savings Bank Account', desc: 'Any bank account with auto-debit enabled and ₹436 available on June 1 each year' },
+    { name: 'Enrollment Form', desc: 'One-page form at your bank or jansuraksha.gov.in — takes 5 minutes to fill' },
+    { name: 'Nominee Details', desc: 'Name, relationship, and Aadhaar/contact of your nominee (person who gets ₹2 lakh)' }
+  ],
+  steps: [
+    'Visit your bank branch OR log into your bank\'s net banking / mobile app',
+    'Find "PMJJBY" or "Jan Suraksha" under the insurance section',
+    'Fill the enrollment form — provide nominee name and relationship',
+    'Sign the one-line good health self-declaration',
+    '₹436 is deducted immediately — you\'re covered from that date',
+    'Annual renewal: ₹436 is auto-deducted every year on May 25 – June 1',
+    'If you die (from any cause), your nominee submits: death certificate + cancelled cheque + discharge form at the bank',
+    '₹2 lakh is paid to nominee\'s account within 30 days of verified claim'
+  ]
+},
+
+{
+  id: 'pmsby',
+  name: 'PM Suraksha Bima Yojana',
+  tagline: '₹2 lakh accident insurance — only ₹20 per year',
+  category: 'Financial',
+  benefitType: 'insurance',
+  benefitAmount: '₹2L accidental death/full disability, ₹1L partial disability',
+  icon: '⛑️',
+  iconBg: '#FFFDE7',
+  bgGradient: 'linear-gradient(135deg, #92400E, #B45309)',
+  description: 'PMSBY costs ₹20 per year — less than two rupees per month — and gives you ₹2 lakh if you die or become fully and permanently disabled in an accident, and ₹1 lakh for partial permanent disability (e.g., losing one eye or one limb). Covers accidents only — not natural death or illness. Auto-deducted from your bank account each year. Best taken together with PMJJBY for complete life + accident coverage at just ₹456/year.',
+  coverageNote: 'Extraordinarily low premium. If you have a bank account, there is almost no reason not to have PMSBY. At ₹20/year, the protection for your family far exceeds the cost.',
+  applyUrl: 'https://jansuraksha.gov.in',
+  conditions: [
+    { param: 'age', op: 'between', value: [18, 70], label: 'Age between 18 and 70 years', reason: 'PMSBY covers people up to age 70, unlike PMJJBY which stops at 50 for enrollment. This makes it especially valuable for older workers who have aged out of PMJJBY. On your 70th birthday, coverage stops at next renewal.', fixable: false },
+    { param: 'bankAccount', op: 'custom', value: true, label: 'Must have a bank account with ₹20 for annual auto-debit', reason: 'The ₹20 premium is auto-debited every year in May/June. If your account has less than ₹20 on that date, coverage lapses for that year. Ensure you always have at least ₹20 in your account around May each year.', fixable: true, fixNote: 'Open a free Jan Dhan account at any bank — you can enroll for PMSBY the same day.' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Identity linked to bank account' },
+    { name: 'Bank Account (any savings account)', desc: 'With ₹20 for auto-debit each year' },
+    { name: 'Enrollment Form', desc: 'One-page form at your bank or jansuraksha.gov.in' },
+    { name: 'Nominee Details', desc: 'Person who gets ₹2 lakh in case of accidental death' }
+  ],
+  steps: [
+    'Visit your bank branch or use mobile banking app',
+    'Find "PMSBY" under insurance or "Jan Suraksha" schemes',
+    'Fill enrollment form with nominee details — takes 2 minutes',
+    '₹20 is deducted — you\'re immediately covered for the next 12 months',
+    'Annual renewal: ₹20 auto-deducted each year in May/June',
+    'Accident claim — attach: FIR/police report + hospital discharge summary',
+    'For disability: also attach disability certificate from government doctor',
+    'For death: also attach death certificate — claim paid to nominee within 30 days'
+  ]
+},
+
+{
+  id: 'pm-ujjwala',
+  name: 'PM Ujjwala Yojana',
+  tagline: 'Free LPG gas connection for women in low-income households',
+  category: 'Food & Utilities',
+  benefitType: 'subsidy',
+  benefitAmount: 'Free connection, cylinder, regulator, hose, burner',
+  icon: '🔥',
+  iconBg: '#FCE4EC',
+  bgGradient: 'linear-gradient(135deg, #B71C1C, #C62828)',
+  description: 'PM Ujjwala gives a completely free LPG gas connection to women from BPL and low-income households — including the security deposit for the cylinder, regulator, gas pipe, and installation. The goal is to replace dangerous indoor cooking on wood and cow dung, which causes chronic respiratory disease. Under Ujjwala 2.0 (launched 2021), migrants and people without permanent address documents in their home state can also apply with a simple self-declaration.',
+  coverageNote: 'Ujjwala 2.0 greatly expanded coverage. Even if you don\'t have local documents, you may now qualify with self-declaration of address. Always check at your nearest LPG distributor.',
+  applyUrl: 'https://www.pmuy.gov.in',
+  conditions: [
+    { param: 'gender', op: 'eq', value: 'female', label: 'Application must be in the name of an adult woman in the household', reason: 'The gas connection is issued in the woman\'s name only. Men cannot apply. This is deliberate — to ensure the woman of the household controls the connection and is the primary beneficiary.', fixable: false },
+    { param: 'age', op: 'gte', value: 18, label: 'Must be 18 years or older', reason: 'Adult women only. Minors cannot apply for a gas connection.', fixable: false },
+    { param: 'no_existing_lpg', op: 'custom', value: true, label: 'Household must NOT already have an LPG connection', reason: 'If any family member already has an LPG connection registered under any scheme (regular or Ujjwala), you cannot get a second free connection. The check is done automatically via your Aadhaar ID in the LPG distributor database.', fixable: false },
+    { param: 'rationCard', op: 'in', value: ['AAY', 'BPL', 'NFSA', 'APL'], label: 'Must hold a BPL/AAY/NFSA ration card — OR belong to a priority category', reason: 'Priority categories include: SC/ST households, PMAY-G beneficiaries, Antyodaya Anna Yojana families, forest dwellers, most backward classes, tea/coffee/rubber plantation workers, river island (char/chapori) dwellers, and brick kiln workers. Under Ujjwala 2.0, migrants can use self-declaration.', fixable: true, fixNote: 'Under Ujjwala 2.0, migrants without local documents can apply with a self-declaration of address. Contact your nearest Indane/HP/Bharat Gas distributor and ask specifically for "Ujjwala 2.0 form".' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card (Woman applicant)', desc: 'Mandatory — must be in the woman\'s name' },
+    { name: 'BPL / Ration Card', desc: 'AAY, BPL, or NFSA card. Ujjwala 2.0 accepts self-declaration for migrants.' },
+    { name: 'Bank Account in Woman\'s Name', desc: 'For LPG subsidy transfers after each refill purchase' },
+    { name: 'Self-Declaration Form', desc: 'Declaring no LPG connection exists in the household. LPG company verifies this via database.' },
+    { name: 'Address Proof', desc: 'Aadhaar serves as address proof. Migrants may use self-declaration of current address.' }
+  ],
+  steps: [
+    'Visit your nearest LPG distributor (Indane, HP Gas, or Bharat Gas) or apply online at pmuy.gov.in',
+    'Ask for the "Ujjwala Yojana" form — or "Ujjwala 2.0 form" if you are a migrant without local documents',
+    'Fill the form with your Aadhaar details, ration card info, and bank account number',
+    'LPG company checks that no connection exists in your household (automatic database check)',
+    'If approved: free cylinder, regulator, gas hose, and burner stove are delivered to your home',
+    'You pay for refills at market price when you need them',
+    'LPG subsidy (if applicable in your state) is transferred to your bank account after each refill'
+  ]
+},
+
+{
+  id: 'pm-vishwakarma',
+  name: 'PM Vishwakarma Yojana',
+  tagline: 'Toolkit grant, free training & low-interest loans for 18 traditional trades',
+  category: 'Skills & Loans',
+  benefitType: 'loan',
+  benefitAmount: '₹15K toolkit + ₹1L loan (Phase 1) + ₹2L (Phase 2) at 5%',
+  icon: '🔨',
+  iconBg: '#FFF3E0',
+  bgGradient: 'linear-gradient(135deg, #BF360C, #D84315)',
+  description: 'PM Vishwakarma is a ₹13,000 crore scheme for traditional craftspeople and artisans working in 18 specified trades. You get four things: (1) ₹15,000 free toolkit grant — given upfront, no repayment, (2) free skills training — 5 days basic + optional 15 days advanced, with ₹500/day stipend while training, (3) collateral-free loan of ₹1 lakh at 5% interest rate (Phase 1), and after repayment, (4) ₹2 lakh more at 5% (Phase 2). Plus support for digital payments with cashback incentives.',
+  coverageNote: '18 trades: Carpenter, Boat Maker, Armourer, Blacksmith, Hammer/Tool Kit Maker, Locksmith, Goldsmith, Potter (Kumbhaar), Sculptor/Stone Carver, Cobbler/Shoemaker, Mason (Rajmistri), Basket/Mat/Broom/Coir Weaver, Doll & Toy Maker, Barber (Naai), Garland Maker (Malakaar), Washerman (Dhobi), Tailor (Darzi), Fishing Net Maker.',
+  applyUrl: 'https://pmvishwakarma.gov.in',
+  conditions: [
+    { param: 'occupation', op: 'in', value: ['artisan', 'self_employed'], label: 'Must actively work in one of the 18 listed traditional trades', reason: 'You must be currently practising the trade as your primary occupation. You need to demonstrate this with evidence of your work. Hobbyists or those who have abandoned the trade are not eligible. New entrants to a listed trade may qualify if they intend to take it up formally.', fixable: false },
+    { param: 'age', op: 'gte', value: 18, label: 'Must be 18 years or older on date of registration', reason: 'No upper age limit — traditional craftspeople of any age, including senior artisans, can benefit. The scheme recognises that these trades are often life-long occupations.', fixable: false },
+    { param: 'not_govt_employee', op: 'custom', value: true, label: 'Must NOT be a government employee (self or immediate family)', reason: 'If the applicant OR their spouse, parents, or children is a central/state government or PSU employee, the whole family is disqualified. "Immediate family" means the nuclear family, not extended.', fixable: false },
+    { param: 'not_prev_large_mudra', op: 'custom', value: true, label: 'Must NOT have received Kishor/Tarun Mudra OR Stand Up India loan in last 5 years', reason: 'Applicants who received MUDRA loans above ₹50,000 (Kishor or Tarun category) or Stand Up India loans in the last 5 years are not eligible. Those who only received Shishu MUDRA (up to ₹50,000) may still qualify.', fixable: false },
+    { param: 'one_per_family', op: 'custom', value: true, label: 'Only ONE person per family can be a Vishwakarma beneficiary', reason: '"Family" means the applicant, their spouse, and unmarried children. Only one member can enroll in PM Vishwakarma at a time. This prevents households from claiming the benefit twice.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card linked to mobile number', desc: 'Mandatory — mobile OTP is used for registration at pmvishwakarma.gov.in' },
+    { name: 'Ration Card / Family ID card', desc: 'To verify family composition and ensure only one application per family' },
+    { name: 'Bank Account (Aadhaar-linked)', desc: 'For toolkit grant, training stipend, and loan disbursement' },
+    { name: 'Caste Certificate', desc: 'SC/ST/OBC certificate if applicable — for additional state-level benefits' },
+    { name: 'Evidence of trade practice', desc: 'Customer receipts, workshop photos, tool ownership, or any evidence of actively practising the trade' }
+  ],
+  steps: [
+    'Registration is done ONLY at a Common Service Centre (CSC) — find your nearest one at locator.csccloud.in',
+    'CSC operator registers you at pmvishwakarma.gov.in using your Aadhaar + mobile OTP',
+    'You receive a PM Vishwakarma Certificate and unique ID (the "Vishwakarma Certificate")',
+    'Attend 5-day basic skills training at a designated training centre (₹500/day stipend paid to your bank account)',
+    'After training, apply for the ₹15,000 toolkit grant — credited to your account automatically',
+    'Optionally attend 15-day advanced skills training (₹500/day stipend)',
+    'Apply for Phase 1 loan: ₹1 lakh at 5% interest, collateral-free, via any registered bank',
+    'After fully repaying Phase 1, apply for Phase 2 loan: ₹2 lakh at 5% interest',
+    'Start accepting digital payments — cashback incentives of ₹1/transaction (up to ₹100/month) are credited'
+  ]
+},
+
+{
+  id: 'pm-matru-vandana',
+  name: 'PM Matru Vandana Yojana',
+  tagline: '₹5,000 cash for first pregnancy, ₹6,000 for second if a girl',
+  category: 'Women & Child',
+  benefitType: 'cash',
+  benefitAmount: '₹5,000 (1st child) / ₹6,000 (2nd child if girl)',
+  icon: '👶',
+  iconBg: '#FCE4EC',
+  bgGradient: 'linear-gradient(135deg, #880E4F, #AD1457)',
+  description: 'PMMVY gives cash benefits to pregnant and lactating women to compensate for wage loss during pregnancy and improve maternal-child nutrition. Under PMMVY 2.0 (revised 2022): First child benefit = ₹5,000 paid in two instalments (₹3,000 early pregnancy + ₹2,000 after delivery and vaccination). Second child benefit = ₹6,000 in ONE instalment — but ONLY if the second child is a girl. This conditional benefit for the second girl child is designed to combat female foeticide.',
+  coverageNote: 'PMMVY 2.0 (2022 revision) made the scheme universal — all pregnant women qualify for the first child benefit, regardless of income. The earlier income restriction has been removed.',
+  applyUrl: 'https://pmmvy.wcd.gov.in',
+  conditions: [
+    { param: 'gender', op: 'eq', value: 'female', label: 'Must be a pregnant or lactating woman (at least 19 years old)', reason: 'This is a maternity benefit for women. The application is always in the pregnant woman\'s name.', fixable: false },
+    { param: 'age', op: 'gte', value: 19, label: 'Must be 19 years or older at time of pregnancy', reason: 'Government policy minimum age is 19. Pregnancies below 19 are handled through adolescent health programs, not PMMVY.', fixable: false },
+    { param: 'not_govt_employee', op: 'custom', value: true, label: 'Must NOT be a government employee receiving paid maternity leave', reason: 'Women eligible for paid maternity leave under central/state government service rules are excluded — they already receive equivalent or better maternity benefits through employment. Women in the private sector (unless receiving government-equivalent maternity leave) qualify.', fixable: false },
+    { param: 'registration_timing', op: 'custom', value: true, label: 'Should register within 150 days of last menstrual period (LMP) for full benefit', reason: 'Registration within 150 days ensures you receive the first instalment of ₹3,000. Late registration (after 150 days) means you miss the first instalment but can still get the second instalment of ₹2,000 after delivery. Don\'t delay — register as soon as you know you\'re pregnant.', fixable: true, fixNote: 'Visit your nearest Anganwadi Centre (AWC) immediately. Ask your ASHA worker to help — she is responsible for registering pregnant women in your area.' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card (Woman\'s)', desc: 'Mandatory for identification and direct bank transfer' },
+    { name: 'Husband\'s / Partner\'s Aadhaar', desc: 'Required if married or in a partnership' },
+    { name: 'MCP Card (Mother and Child Protection Card)', desc: 'Issued by Anganwadi Centre — records all antenatal visits and vaccinations. Keep this card safe throughout pregnancy.' },
+    { name: 'Bank Account in Woman\'s Name (Aadhaar-linked)', desc: 'Payment is directly to your account. If you don\'t have one, open a Jan Dhan account at any bank immediately — it\'s free and same-day.' },
+    { name: 'Mobile Number', desc: 'Linked to Aadhaar for OTP verification and payment alerts' }
+  ],
+  steps: [
+    'Register at your nearest Anganwadi Centre (AWC) as soon as you know you are pregnant — do not wait',
+    'Your ASHA worker or AWC staff will fill the registration form on pmmvy.wcd.gov.in for you',
+    'First instalment ₹3,000: paid after registration AND at least one government antenatal check-up (ANC)',
+    'Attend all scheduled antenatal check-ups at a government sub-centre, PHC, or hospital',
+    'Deliver your baby at a government health facility or accredited facility',
+    'Second instalment ₹2,000: paid after child birth registration AND first round of vaccinations (BCG, OPV, DPT, Hep-B)',
+    'If this is your second pregnancy and the child is a girl: ₹6,000 is paid in one instalment after delivery',
+    'Separately, if you deliver at a government hospital, you may also receive cash under Janani Suraksha Yojana (JSY)'
+  ]
+}
+
+];
+
+// ============================================================
+// QUESTIONNAIRE QUESTIONS
+// ============================================================
+const QUESTIONS = [
+  {
+    id: 'state',
+    question: 'Which state do you live in?',
+    hint: 'Required for state-specific eligibility variations',
+    type: 'select',
+    options: ['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal','Delhi','Jammu & Kashmir','Ladakh','Puducherry','Chandigarh','Other/Union Territory']
+  },
+  {
+    id: 'area',
+    question: 'Do you live in a city or a village?',
+    hint: 'Rural/urban status affects housing scheme eligibility',
+    type: 'options',
+    options: [
+      { value: 'rural', label: 'Village / Rural area', emoji: '🌾' },
+      { value: 'urban', label: 'City / Town / Urban area', emoji: '🏙️' }
+    ]
+  },
+  {
+    id: 'age',
+    question: 'What is your age?',
+    hint: 'Age determines eligibility for insurance, pensions, and maternity schemes',
+    type: 'number',
+    placeholder: 'Enter your age (e.g. 32)',
+    min: 1, max: 120
+  },
+  {
+    id: 'gender',
+    question: 'What is your gender?',
+    hint: 'Some schemes are exclusively for women',
+    type: 'options',
+    options: [
+      { value: 'male', label: 'Male', emoji: '👨' },
+      { value: 'female', label: 'Female', emoji: '👩' },
+      { value: 'other', label: 'Other', emoji: '🧑' }
+    ]
+  },
+  {
+    id: 'caste',
+    question: 'What is your caste category?',
+    hint: 'Required for reserved category scheme eligibility. Your answer is private.',
+    type: 'options',
+    options: [
+      { value: 'General', label: 'General / EWS', emoji: '👤' },
+      { value: 'OBC', label: 'OBC', emoji: '🔵' },
+      { value: 'SC', label: 'SC (Scheduled Caste)', emoji: '🟡' },
+      { value: 'ST', label: 'ST (Scheduled Tribe)', emoji: '🟢' },
+      { value: 'unknown', label: "Don't Know / Prefer Not to Say", emoji: '❓' }
+    ]
+  },
+  {
+    id: 'income',
+    question: "What is your family's total yearly income?",
+    hint: 'Approximate is fine. Include all sources — farming, business, salary, rent.',
+    type: 'options',
+    options: [
+      { value: 50000, label: 'Below ₹50,000', emoji: '💸' },
+      { value: 100000, label: '₹50,000 – ₹1 lakh', emoji: '💵' },
+      { value: 150000, label: '₹1 lakh – ₹1.5 lakh', emoji: '💴' },
+      { value: 200000, label: '₹1.5 lakh – ₹2 lakh', emoji: '💶' },
+      { value: 300000, label: '₹2 lakh – ₹3 lakh', emoji: '💷' },
+      { value: 500000, label: '₹3 lakh – ₹5 lakh', emoji: '🪙' },
+      { value: 1000000, label: 'Above ₹5 lakh', emoji: '🏦' }
+    ]
+  },
+  {
+    id: 'occupation',
+    question: 'What best describes your main work?',
+    hint: 'Choose your primary occupation or source of livelihood',
+    type: 'options',
+    options: [
+      { value: 'farmer_own', label: 'Farmer (own land)', emoji: '🌾' },
+      { value: 'farmer_tenant', label: 'Farmer (tenant/lease)', emoji: '🌱' },
+      { value: 'agri_labourer', label: 'Agricultural Labourer', emoji: '⛏️' },
+      { value: 'daily_wage', label: 'Daily Wage / Construction', emoji: '🏗️' },
+      { value: 'street_vendor', label: 'Street Vendor / Hawker', emoji: '🛒' },
+      { value: 'artisan', label: 'Artisan / Traditional Craftsperson', emoji: '🔨' },
+      { value: 'self_employed', label: 'Self Employed / Small Business', emoji: '💼' },
+      { value: 'private_employee', label: 'Private Sector Employee', emoji: '🏢' },
+      { value: 'govt_employee', label: 'Government Employee', emoji: '🏛️' },
+      { value: 'homemaker', label: 'Homemaker', emoji: '🏠' },
+      { value: 'unemployed', label: 'Unemployed / Job Seeking', emoji: '🔍' }
+    ]
+  },
+  {
+    id: 'rationCard',
+    question: 'What type of ration card does your family have?',
+    hint: 'This is the most important filter for welfare and health insurance schemes',
+    type: 'options',
+    options: [
+      { value: 'AAY', label: 'Antyodaya (AAY) — Orange card', emoji: '🟠' },
+      { value: 'BPL', label: 'BPL — Red card', emoji: '🔴' },
+      { value: 'NFSA', label: 'NFSA / Priority Household — Yellow or Blue card', emoji: '🟡' },
+      { value: 'APL', label: 'APL (Above Poverty Line)', emoji: '🟢' },
+      { value: 'none', label: 'No ration card', emoji: '❌' },
+      { value: 'unknown', label: "Have a card but don't know type", emoji: '❓' }
+    ]
+  },
+  {
+    id: 'hasLand',
+    question: 'Do you own agricultural land?',
+    hint: 'Land in your name (or family) in official records — required for PM Kisan',
+    type: 'options',
+    options: [
+      { value: false, label: 'No', emoji: '❌' },
+      { value: true, label: 'Yes, land is registered in my name', emoji: '✅' }
+    ]
+  },
+  {
+    id: 'govtEmployee',
+    question: 'Is anyone in your immediate family a government employee or pensioner?',
+    hint: 'Central govt, state govt, PSU employees and retired pensioners — affects multiple schemes',
+    type: 'options',
+    options: [
+      { value: false, label: 'No — no government employees in my family', emoji: '✅' },
+      { value: true, label: 'Yes — someone in my family is / was a govt employee', emoji: '🏛️' }
+    ]
+  },
+  {
+    id: 'incomeTaxPayer',
+    question: 'Did anyone in your household file an income tax return last year?',
+    hint: 'Income tax filers are excluded from PM Kisan — even if they own farmland',
+    type: 'options',
+    options: [
+      { value: false, label: 'No — nobody filed income tax', emoji: '✅' },
+      { value: true, label: 'Yes — someone in my household filed income tax', emoji: '📄' }
+    ]
+  },
+  {
+    id: 'hasLPG',
+    question: 'Does your household already have an LPG gas connection?',
+    hint: 'Needed to check eligibility for PM Ujjwala free gas connection',
+    type: 'options',
+    options: [
+      { value: false, label: 'No — we cook on wood, dung, or kerosene', emoji: '🪵' },
+      { value: true, label: 'Yes — we already have LPG', emoji: '✅' }
+    ]
+  },
+  {
+    id: 'hasBankAccount',
+    question: 'Do you have a savings bank account in your name?',
+    hint: 'Required for PMJJBY, PMSBY insurance and all government benefit transfers',
+    type: 'options',
+    options: [
+      { value: true, label: 'Yes — I have a bank account', emoji: '✅' },
+      { value: false, label: 'No — I don\'t have a bank account', emoji: '❌' }
+    ]
+  },
+  {
+    id: 'pregnant',
+    question: 'Are you currently pregnant or did you give birth in the last 6 months?',
+    hint: 'Required for PM Matru Vandana Yojana eligibility',
+    type: 'options',
+    options: [
+      { value: false, label: 'No', emoji: '❌' },
+      { value: true, label: 'Yes', emoji: '✅' }
+    ]
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let userProfile = {};
+let currentStep = 0;
+let fromResults = false;
+let paywallUnlocked = false;
+
+// ============================================================
+// ELIGIBILITY ENGINE
+// ============================================================
+function toBool(v) {
+  if (typeof v === 'boolean') return v;
+  if (v === 'true') return true;
+  if (v === 'false') return false;
+  return !!v;
+}
+
+function checkEligibility(scheme, profile) {
+  const results = [];
+  let passCount = 0, failCount = 0, unknownCount = 0;
+
+  for (const cond of scheme.conditions) {
+    let status = 'unknown';
+
+    if (cond.param === 'age') {
+      if (profile.age) {
+        let passed;
+        if (cond.op === 'between') passed = profile.age >= cond.value[0] && profile.age <= cond.value[1];
+        else if (cond.op === 'gte') passed = profile.age >= cond.value;
+        else if (cond.op === 'lte') passed = profile.age <= cond.value;
+        status = passed ? 'pass' : 'fail';
+      }
+    } else if (cond.param === 'gender') {
+      if (profile.gender) status = profile.gender === cond.value ? 'pass' : 'fail';
+    } else if (cond.param === 'area') {
+      if (profile.area) status = profile.area === cond.value ? 'pass' : 'fail';
+    } else if (cond.param === 'income') {
+      if (profile.income !== undefined) status = profile.income <= cond.value ? 'pass' : 'fail';
+    } else if (cond.param === 'occupation') {
+      if (profile.occupation) status = cond.value.includes(profile.occupation) ? 'pass' : 'fail';
+    } else if (cond.param === 'rationCard') {
+      if (profile.rationCard) status = cond.value.includes(profile.rationCard) ? 'pass' : 'fail';
+    } else if (cond.param === 'hasLand') {
+      if (profile.hasLand !== undefined) status = toBool(profile.hasLand) === cond.value ? 'pass' : 'fail';
+    } else if (cond.param === 'not_govt_employee') {
+      if (profile.govtEmployee !== undefined) status = !toBool(profile.govtEmployee) ? 'pass' : 'fail';
+    } else if (cond.param === 'not_income_taxpayer') {
+      if (profile.incomeTaxPayer !== undefined) status = !toBool(profile.incomeTaxPayer) ? 'pass' : 'fail';
+    } else if (cond.param === 'not_professional') {
+      // Best-effort check based on available data
+      if (profile.occupation) {
+        const proOccs = ['govt_employee', 'private_employee'];
+        if (proOccs.includes(profile.occupation) && profile.income > 500000) status = 'unknown';
+        else status = 'pass';
+      }
+    } else if (cond.param === 'no_existing_lpg') {
+      if (profile.hasLPG !== undefined) status = !toBool(profile.hasLPG) ? 'pass' : 'fail';
+    } else if (cond.param === 'bankAccount') {
+      if (profile.hasBankAccount !== undefined) status = toBool(profile.hasBankAccount) ? 'pass' : 'fail';
+    } else if (cond.param === 'pregnant_applicable') {
+      if (profile.pregnant !== undefined) status = toBool(profile.pregnant) ? 'pass' : 'fail';
+    } else {
+      // All custom/unknown conditions remain unknown
+      status = 'unknown';
+    }
+
+    if (status === 'pass') passCount++;
+    else if (status === 'fail') failCount++;
+    else unknownCount++;
+
+    results.push({ ...cond, status });
+  }
+
+  let certainty;
+  if (failCount === 0 && unknownCount === 0) certainty = 'high';
+  else if (failCount === 0) certainty = 'medium';
+  else certainty = 'fail';
+
+  return { results, certainty, passCount, failCount, unknownCount };
+}
+
+// ============================================================
+// SCHEME CARD RENDERER
+// ============================================================
+function renderSchemeCard(scheme) {
+  const tagClass = { cash: 'tag-cash', loan: 'tag-loan', insurance: 'tag-insurance', subsidy: 'tag-subsidy', account: 'tag-account' }[scheme.benefitType] || 'tag-cash';
+  const typeLabel = { cash: 'Cash Benefit', loan: 'Loan', insurance: 'Insurance', subsidy: 'Subsidy', account: 'Free Account' }[scheme.benefitType] || 'Benefit';
+  return `<div class="scheme-card" onclick="showSchemeDetail('${scheme.id}')">
+    <div class="scheme-icon-wrap" style="background:${scheme.iconBg}">${scheme.icon}</div>
+    <div class="scheme-info">
+      <div class="scheme-name">${scheme.name}</div>
+      <div class="scheme-tagline">${scheme.tagline}</div>
+      <div class="scheme-tags">
+        <span class="tag ${tagClass}">${typeLabel}</span>
+        <span class="tag" style="background:#F0EDE8;color:#666">${scheme.benefitAmount}</span>
+        <span class="tag" style="background:#F5F5F5;color:#888">${scheme.category}</span>
+      </div>
+    </div>
+    <div class="scheme-arrow">›</div>
+  </div>`;
+}
+
+function initHome() {
+  const el = document.getElementById('all-schemes-home');
+  if (el) el.innerHTML = SCHEMES.map(s => renderSchemeCard(s)).join('');
+}
+
+function filterSchemes(val) {
+  const lower = (val || '').toLowerCase();
+  const filtered = lower
+    ? SCHEMES.filter(s => s.name.toLowerCase().includes(lower) || s.tagline.toLowerCase().includes(lower) || s.category.toLowerCase().includes(lower) || s.description.toLowerCase().includes(lower))
+    : SCHEMES;
+  const el = document.getElementById('browse-schemes');
+  if (el) el.innerHTML = filtered.length ? filtered.map(s => renderSchemeCard(s)).join('') : '<p style="color:var(--slate);text-align:center;padding:40px">No schemes found.</p>';
+}
+
+// ============================================================
+// QUESTIONNAIRE
+// ============================================================
+function startQuestionnaire() {
+  currentStep = 0;
+  // Keep existing answers so user can review/edit them
+  showPage('quiz');
+  renderQuestion();
+}
+
+function resetQuestionnaire() {
+  currentStep = 0;
+  userProfile = {};
+  paywallUnlocked = false;
+  syncRefreshBtn();
+  showPage('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentStep];
+  const container = document.getElementById('quiz-container');
+  const progress = QUESTIONS.map((_, i) => `<div class="progress-dot ${i < currentStep ? 'done' : i === currentStep ? 'active' : ''}"></div>`).join('');
+
+  let inputHtml = '';
+  if (q.type === 'options') {
+    const cols = q.options.length > 4;
+    inputHtml = `<div class="options-grid${cols ? ' two-col' : ''}">` +
+      q.options.map(opt => {
+        const val = String(opt.value);
+        const sel = userProfile[q.id] !== undefined && String(userProfile[q.id]) === val;
+        return `<button class="option-btn${sel ? ' selected' : ''}" data-qid="${q.id}" data-val="${String(opt.value)}" onclick="selectOption(this)">
+          <span class="option-emoji">${opt.emoji}</span>${opt.label}
+        </button>`;
+      }).join('') + '</div>';
+  } else if (q.type === 'select') {
+    inputHtml = `<select class="quiz-select" onchange="userProfile['${q.id}']=this.value">
+      <option value="">Select your state...</option>
+      ${q.options.map(o => `<option value="${o}"${userProfile[q.id] === o ? ' selected' : ''}>${o}</option>`).join('')}
+    </select>`;
+  } else if (q.type === 'number') {
+    inputHtml = `<input type="number" class="quiz-input" placeholder="${q.placeholder}" min="${q.min}" max="${q.max}"
+      value="${userProfile[q.id] || ''}"
+      oninput="userProfile['${q.id}']=parseInt(this.value)||undefined">`;
+  }
+
+  const isFirst = currentStep === 0;
+  const isLast = currentStep === QUESTIONS.length - 1;
+  const backFn = isFirst ? "showPage('home')" : 'prevStep()';
+  const backLabel = isFirst ? '← Home' : '← Back';
+  const nextLabel = isLast ? 'See My Results →' : 'Next →';
+
+  container.innerHTML = `
+    <div class="quiz-progress">${progress}</div>
+    <div class="quiz-card">
+      <div class="quiz-step-label">Question ${currentStep + 1} of ${QUESTIONS.length}</div>
+      <div class="quiz-question">${q.question}</div>
+      <div class="quiz-hint">${q.hint}</div>
+      ${inputHtml}
+      <div class="quiz-nav">
+        <button class="btn-back" onclick="${backFn}">${backLabel}</button>
+        <button class="btn-next" onclick="nextStep()">${nextLabel}</button>
+      </div>
+    </div>`;
+}
+
+function selectOption(btn) {
+  const id = btn.dataset.qid;
+  let value = btn.dataset.val;
+  if (value === "true") value = true;
+  else if (value === "false") value = false;
+  else if (!isNaN(value) && value !== "") value = Number(value);
+  userProfile[id] = value;
+  syncRefreshBtn();
+  document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  setTimeout(nextStep, 280);
+}
+
+function nextStep() {
+  if (currentStep < QUESTIONS.length - 1) { currentStep++; renderQuestion(); }
+  else showResults();
+}
+
+function prevStep() {
+  if (currentStep > 0) { currentStep--; renderQuestion(); }
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+function showResults() {
+  showPage('results');
+  fromResults = true;
+  syncRefreshBtn();
+  const high = [], medium = [], failed = [];
+  for (const scheme of SCHEMES) {
+    const { certainty } = checkEligibility(scheme, userProfile);
+    if (certainty === 'high') high.push(scheme);
+    else if (certainty === 'medium') medium.push(scheme);
+    else failed.push(scheme);
+  }
+  const total = high.length + medium.length;
+  let html = `<div class="results-header">
+    <p style="opacity:0.7;font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Your Personalised Results</p>
+    <h2>You match <span class="results-count">${total}</span> schemes</h2>
+    <p>${high.length} definite · ${medium.length} likely · ${failed.length} don't qualify</p>
+  </div>
+  <div class="ad-placeholder">📢 Advertisement — Google AdSense</div>`;
+
+  if (high.length) {
+    html += `<div class="certainty-section">
+      <div class="certainty-label"><div class="certainty-dot dot-high"></div>
+        <div><div class="certainty-title">✅ You Definitely Qualify — ${high.length} scheme${high.length>1?'s':''}</div>
+        <div class="certainty-sub">You meet all stated criteria for these schemes based on your answers</div></div>
+      </div>${high.map(s=>renderResultCard(s,'high')).join('')}
+    </div>`;
+  }
+  if (medium.length) {
+    html += `<div class="certainty-section">
+      <div class="certainty-label"><div class="certainty-dot dot-medium"></div>
+        <div><div class="certainty-title">⚠️ You Likely Qualify — Verify — ${medium.length} scheme${medium.length>1?'s':''}</div>
+        <div class="certainty-sub">You meet the main criteria but some details couldn't be confirmed from your answers</div></div>
+      </div>${medium.map(s=>renderResultCard(s,'medium')).join('')}
+    </div>`;
+  }
+  if (failed.length) {
+    html += `<div class="certainty-section">
+      <div class="certainty-label"><div class="certainty-dot dot-check"></div>
+        <div><div class="certainty-title">❌ You Currently Don't Qualify — ${failed.length} scheme${failed.length>1?'s':''}</div>
+        <div class="certainty-sub">Tap to see exactly why — some conditions may be fixable</div></div>
+      </div>${failed.map(s=>renderResultCard(s,'check')).join('')}
+    </div>`;
+  }
+  html += `<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px;padding-bottom:24px">
+    <button class="btn-back" onclick="resetQuestionnaire()">🔄 Start Fresh</button>
+    <button class="btn-back" data-action="showPage:browse">📋 Browse All Schemes</button>
+  </div>`;
+  document.getElementById('results-content').innerHTML = html;
+}
+
+function renderResultCard(scheme, certainty) {
+  return `<div class="result-scheme-card ${certainty}" onclick="showSchemeDetail('${scheme.id}')">
+    <div style="font-size:28px">${scheme.icon}</div>
+    <div style="flex:1">
+      <div class="scheme-name">${scheme.name}</div>
+      <div class="scheme-tagline">${scheme.tagline}</div>
+    </div>
+    <div style="color:var(--border);font-size:20px">›</div>
+  </div>`;
+}
+
+function unlockPaywall(schemeId) {
+  // TODO: Integrate payment gateway (Razorpay/PayU)
+  // For now, simulate unlock after confirmation
+  if (confirm('Payment of ₹29 will be processed. Proceed?')) {
+    paywallUnlocked = true;
+    showSchemeDetail(schemeId);
+  }
+}
+
+// ============================================================
+// SCHEME DETAIL + GAP ANALYSIS
+// ============================================================
+function showSchemeDetail(schemeId) {
+  const scheme = SCHEMES.find(s => s.id === schemeId);
+  if (!scheme) return;
+  showPage('detail');
+
+  const hasProfile = Object.keys(userProfile).length > 0;
+  const eligResult = hasProfile ? checkEligibility(scheme, userProfile) : null;
+
+  let gapBanner = '';
+  if (eligResult) {
+    if (eligResult.failCount === 0 && eligResult.unknownCount === 0) {
+      gapBanner = `<div class="gap-banner pass"><h3>✅ You Qualify for This Scheme</h3>
+        <p>Based on your answers, you meet all the stated eligibility conditions. Follow the application steps below to apply.</p></div>`;
+    } else if (eligResult.failCount === 0) {
+      gapBanner = `<div class="gap-banner partial"><h3>⚠️ You Likely Qualify</h3>
+        <p>You meet the main criteria. Some conditions couldn't be verified from your answers — review the ❓ items before applying.</p></div>`;
+    } else {
+      const fails = eligResult.results.filter(r => r.status === 'fail');
+      const fixable = fails.filter(r => r.fixable);
+      gapBanner = `<div class="gap-banner fail"><h3>❌ You Currently Don't Fully Qualify</h3>
+        <p>You don't meet <strong>${fails.length} condition${fails.length>1?'s':''}</strong>.${fixable.length > 0 ? ` <strong>${fixable.length}</strong> of these may be fixable — see the tips below.` : ' These are hard exclusions.'}</p></div>`;
+    }
+  }
+
+  let eligSection = '';
+  if (eligResult) {
+    const eligInner = `<div class="detail-section" style="grid-column:1/-1" id="gap-analysis-inner">
+      <h3>Eligibility Check — Your Profile vs. This Scheme</h3>
+      ${eligResult.results.map(r => {
+        const icon = r.status === 'pass' ? '✅' : r.status === 'fail' ? '❌' : '❓';
+        return `<div class="elig-row">
+          <div class="elig-icon">${icon}</div>
+          <div class="elig-text">
+            <div class="elig-label">${r.label}</div>
+            ${r.status === 'fail' ? `<div class="elig-reason">${r.reason}</div>` : ''}
+            ${r.status === 'fail' && r.fixable && r.fixNote ? `<div class="elig-fix">💡 How to fix: ${r.fixNote}</div>` : ''}
+            ${r.status === 'unknown' ? `<div class="elig-reason" style="color:var(--amber)">Couldn't verify from your answers — check manually at the official website before applying.</div>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+    // eligSection always shows full content — outer detailsSection paywall gates it
+    eligSection = eligInner;
+  }
+
+  const backAction = hasProfile ? "showPage('results')" : "showPage('browse')";
+  const backLabel = hasProfile ? '← Back to Results' : '← Browse All';
+
+  // Build the paywalled content block
+  const detailsInner = `
+    <div class="detail-grid">
+      ${eligSection}
+      <div class="detail-section">
+        <h3>Documents You Need</h3>
+        ${scheme.documents.map((doc, i) => `
+          <div class="doc-item">
+            <div class="doc-num">${i + 1}</div>
+            <div><div class="doc-name">${doc.name}</div><div class="doc-desc">${doc.desc}</div></div>
+          </div>`).join('')}
+      </div>
+      <div class="detail-section">
+        <h3>How to Apply — Step by Step</h3>
+        ${scheme.steps.map((step, i) => `
+          <div class="doc-item">
+            <div class="doc-num">${i + 1}</div>
+            <div><div class="doc-desc" style="font-size:14px;color:var(--navy)">${step}</div></div>
+          </div>`).join('')}
+        <a href="${scheme.applyUrl}" target="_blank" rel="noopener" class="apply-btn">Apply on Official Website →</a>
+        ${!hasProfile ? `<button class="check-my-btn" data-action="startQuestionnaire">Check If I Qualify →</button>` : ''}
+      </div>
+    </div>`;
+
+  const detailsSection = paywallUnlocked ? detailsInner : `
+    <div class="paywall-wrap">
+      <div class="paywall-blur">${detailsInner}</div>
+      <div class="paywall-overlay">
+        <div class="paywall-lock">🔒</div>
+        <div class="paywall-title">Unlock Full Scheme Details</div>
+        <div class="paywall-sub">Get your eligibility breakdown, required documents, and step-by-step application guide.</div>
+        <button class="paywall-btn" onclick="unlockPaywall('${schemeId}')">Unlock for ₹29 →</button>
+        <div class="paywall-note">One-time payment · Instant access · All 10 schemes</div>
+      </div>
+    </div>`;
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-topbar">
+      <button class="detail-back" onclick="${backAction}">${backLabel}</button>
+      <div class="detail-topbar-right">
+        <button class="detail-back" onclick="showPage('home')">🏠 Home</button>
+      </div>
+    </div>
+    <div class="detail-hero" style="background:${scheme.bgGradient}">
+      <div style="font-size:44px;margin-bottom:12px">${scheme.icon}</div>
+      <h1>${scheme.name}</h1>
+      <p class="tagline">${scheme.tagline}</p>
+      <span class="detail-benefit-pill">💰 ${scheme.benefitAmount}</span>
+    </div>
+    ${gapBanner}
+    <div class="detail-section" style="margin-bottom:16px">
+      <h3>What This Scheme Gives You</h3>
+      <p style="font-size:15px;color:var(--navy);line-height:1.8">${scheme.description}</p>
+      ${scheme.coverageNote ? `<div class="coverage-note">ℹ️ <strong>Coverage note:</strong> ${scheme.coverageNote}</div>` : ''}
+    </div>
+    ${detailsSection}
+    <div class="ad-placeholder">📢 Advertisement — Google AdSense</div>`;
+}
+
+// ============================================================
+// PAGE ROUTING
+// ============================================================
+
+function syncRefreshBtn() {
+  const btn = document.getElementById('nav-refresh-btn');
+  if (btn) btn.style.display = Object.keys(userProfile).length > 0 ? 'inline-block' : 'none';
+}
+function showPage(page) {
+  syncRefreshBtn();
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(`page-${page}`);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+  if (page === 'browse') filterSchemes('');
+  if (page === 'home') initHome();
+  if (page !== 'results') fromResults = false;
+  try { history.replaceState({ page }, '', `#${page}`); } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  syncRefreshBtn();
+  initHome();
+  const hash = window.location.hash.replace('#', '');
+  if (hash && document.getElementById(`page-${hash}`)) showPage(hash);
+});
+
+// Event delegation for static buttons (required for sandboxed iframe)
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  if (action === 'showPage:home') showPage('home');
+  else if (action === 'showPage:browse') showPage('browse');
+  else if (action === 'startQuestionnaire') startQuestionnaire();
+});
+</script>
+</body>
+</html>
