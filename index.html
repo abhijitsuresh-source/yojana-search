@@ -226,7 +226,7 @@
   <div class="nav-links">
     <button class="nav-btn outline" data-action="showPage:browse">Browse</button>
     <button class="nav-btn outline" onclick="resetQuestionnaire()" id="nav-refresh-btn" style="display:none">🔄 Refresh</button>
-    <button class="nav-btn primary" data-action="startQuestionnaire">Check Eligibility</button>
+    <button class="nav-btn primary" data-action="startQuestionnaire" id="nav-check-btn">Check Eligibility</button>
   </div>
 </nav>
 
@@ -1278,8 +1278,11 @@ function showSchemeDetail(schemeId) {
 // ============================================================
 
 function syncRefreshBtn() {
-  const btn = document.getElementById('nav-refresh-btn');
-  if (btn) btn.style.display = Object.keys(userProfile).length > 0 ? 'inline-block' : 'none';
+  const hasAnswers = Object.keys(userProfile).length > 0;
+  const refresh = document.getElementById('nav-refresh-btn');
+  const check = document.getElementById('nav-check-btn');
+  if (refresh) refresh.style.display = hasAnswers ? 'inline-block' : 'none';
+  if (check) check.style.display = hasAnswers ? 'none' : 'inline-block';
 }
 function showPage(page) {
   syncRefreshBtn();
@@ -1290,7 +1293,9 @@ function showPage(page) {
   if (page === 'browse') filterSchemes('');
   if (page === 'home') initHome();
   if (page !== 'results') fromResults = false;
-  try { history.replaceState({ page }, '', `#${page}`); } catch(e) {}
+  if (page !== 'detail') {
+    try { history.replaceState({ page }, '', `#${page}`); } catch(e) {}
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
