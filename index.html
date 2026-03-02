@@ -2506,6 +2506,7 @@ function prevStep() {
 function showResults() {
   showPage('results');
   fromResults = true;
+  saveState();
   syncRefreshBtn();
   const high = [], medium = [], failed = [];
   for (const scheme of SCHEMES) {
@@ -2775,7 +2776,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // For results page on reload: only show if we have answers
     else if (hash === 'results' && Object.keys(userProfile).length > 0) {
-      showPage('results');
       showResults();
     }
     else if (hash === 'quiz' || hash === 'results') {
