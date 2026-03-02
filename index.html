@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzBGMUUyRSIvPgogIDx0ZXh0IHg9IjE2IiB5PSIyMyIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRTg2MTJBIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ZPC90ZXh0Pgo8L3N2Zz4=">
 <title>YojanaSearch — Find Government Schemes You Qualify For</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -156,7 +157,8 @@
   .page.active { display: block; }
   footer { background: var(--navy); color: rgba(255,255,255,0.5); text-align: center; padding: 24px; font-size: 13px; margin-top: 80px; }
   footer a { color: var(--saffron-light); text-decoration: none; }
-  .ad-placeholder { background: #F0EDE8; border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; color: var(--slate); font-size: 13px; margin: 24px 0; }
+  .ad-placeholder { background: #F7F7F7; border: 1px solid #E8E8E8; border-radius: 8px; padding: 20px; text-align: center; color: #BBB; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; margin: 20px 0; min-height: 90px; display: flex; align-items: center; justify-content: center; }
+  .ad-slot { margin: 20px 0; }
   .coverage-note { background: #FFF8F0; border: 1px solid #FFD9B3; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #7C4A00; margin-top: 14px; line-height: 1.6; }
   .coverage-note strong { font-weight: 700; }
   @media (max-width: 600px) {
@@ -228,6 +230,9 @@
   @media(min-width:600px){ .cat-grid { grid-template-columns: repeat(3, 1fr); } }
 </style>
   <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
+  <!-- Google AdSense — uncomment and replace ca-pub-XXXXXXXXXXXXXXXX after approval
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+  -->
 </head>
 <body>
 
@@ -269,7 +274,11 @@
       </div>
       <div class="scheme-list" id="home-cat-scheme-list"></div>
     </div>
-    <div class="ad-placeholder">📢 Advertisement — Google AdSense</div>
+    <!-- Google AdSense — Home Page Banner -->
+    <div class="ad-slot" id="ad-home">
+      <!-- Replace this comment with your AdSense <ins> tag after approval -->
+      <div class="ad-placeholder">Advertisement</div>
+    </div>
   </div>
 </div>
 
@@ -313,6 +322,11 @@
 <footer>
   <p>YojanaSearch is an independent information service. Always verify eligibility on official government portals before applying.</p>
   <p style="margin-top:8px">Data sourced from official scheme guidelines and <a href="https://myscheme.gov.in" target="_blank">myScheme.gov.in</a>. Last updated February 2026.</p>
+  <p style="margin-top:12px">
+    <a href="#" onclick="showPage('privacy');return false;" style="color:var(--slate);font-size:12px;text-decoration:underline">Privacy Policy</a>
+    <span style="color:var(--border);margin:0 8px">|</span>
+    <span style="color:var(--slate);font-size:12px">© 2026 YojanaSearch</span>
+  </p>
 </footer>
 
 <script>
@@ -2521,7 +2535,7 @@ function showResults() {
     <h2>You match <span class="results-count">${total}</span> schemes</h2>
     <p>${high.length} definite · ${medium.length} likely · ${failed.length} don't qualify</p>
   </div>
-  <div class="ad-placeholder">📢 Advertisement — Google AdSense</div>`;
+  <div class="ad-slot" id="ad-results"><div class="ad-placeholder">Advertisement</div></div>`;
 
   if (high.length) {
     html += `<div class="certainty-section">
@@ -2735,7 +2749,7 @@ function showSchemeDetail(schemeId) {
       ${scheme.coverageNote ? `<div class="coverage-note">ℹ️ <strong>Coverage note:</strong> ${scheme.coverageNote}</div>` : ''}
     </div>
     ${detailsSection}
-    <div class="ad-placeholder">📢 Advertisement — Google AdSense</div>`;
+    <div class="ad-slot" id="ad-detail"><div class="ad-placeholder">Advertisement</div></div>`;
 }
 
 // ============================================================
@@ -2799,5 +2813,41 @@ document.addEventListener('click', function(e) {
   else if (action === 'startQuestionnaire') startQuestionnaire();
 });
 </script>
+
+<div id="page-privacy" class="page">
+  <div class="main" style="max-width:720px;padding-bottom:60px">
+    <button class="detail-back" data-action="showPage:home">← Back to Home</button>
+    <h1 style="font-size:26px;color:var(--navy);margin:24px 0 8px">Privacy Policy</h1>
+    <p style="color:var(--slate);font-size:13px;margin-bottom:32px">Last updated: March 2026</p>
+
+    <h2 style="font-size:17px;color:var(--navy);margin:24px 0 8px">1. About This Site</h2>
+    <p style="color:#444;line-height:1.7;font-size:15px">YojanaSearch (yojanasearch.in) is an independent information service that helps Indian citizens discover central government schemes they may qualify for. We are not affiliated with the Government of India or any government department.</p>
+
+    <h2 style="font-size:17px;color:var(--navy);margin:24px 0 8px">2. Information We Collect</h2>
+    <p style="color:#444;line-height:1.7;font-size:15px">When you use the eligibility checker, you provide information such as your state, age, income, occupation, and family details. This information is stored locally on your device (using browser localStorage) and is never transmitted to our servers. We do not collect, store, or process your personal data on any backend server.</p>
+
+    <h2 style="font-size:17px;color:var(--navy);margin:24px 0 8px">3. Payments</h2>
+    <p style="color:#444;line-height:1.7;font-size:15px">If you choose to unlock the detailed eligibility report (₹29), payment is processed securely by Razorpay. We do not store your payment card information. Razorpay's privacy policy governs the handling of your payment data. A one-time session unlock is stored locally in your browser.</p>
+
+    <h2 style="font-size:17px;color:var(--navy);margin:24px 0 8px">4. Cookies and Advertising</h2>
+    <p style="color:#444;line-height:1.7;font-size:15px">We use Google AdSense to display advertisements on this site. Google AdSense may use cookies to serve ads based on your prior visits to this and other websites. You can opt out of personalised advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" style="color:var(--saffron)">Google Ads Settings</a>. We do not control the content of advertisements shown by Google.</p>
+
+    <h2 style="font-size:17px;color:var(--navy);margin:24px 0 8px">5. Analytics</h2>
+    <p style="color:#444;line-height:1.7;font-size:15px">We may use anonymised analytics tools to understand how visitors use the site (e.g. which pages are visited, how long sessions last). No personally identifiable information is collected through analytics.</p>
+
+    <h2 style="font-size:17px;color:var(--navy);margin:24px 0 8px">6. Third-Party Links</h2>
+    <p style="color:#444;line-height:1.7;font-size:15px">This site links to official government portals (pmkisan.gov.in, pmjay.gov.in, etc.) and other third-party websites. We are not responsible for the privacy practices of those websites.</p>
+
+    <h2 style="font-size:17px;color:var(--navy);margin:24px 0 8px">7. Children's Privacy</h2>
+    <p style="color:#444;line-height:1.7;font-size:15px">This site is intended for use by adults. We do not knowingly collect personal information from children under 13.</p>
+
+    <h2 style="font-size:17px;color:var(--navy);margin:24px 0 8px">8. Changes to This Policy</h2>
+    <p style="color:#444;line-height:1.7;font-size:15px">We may update this Privacy Policy from time to time. The date at the top of this page reflects the most recent revision. Continued use of the site after changes constitutes acceptance of the updated policy.</p>
+
+    <h2 style="font-size:17px;color:var(--navy);margin:24px 0 8px">9. Contact</h2>
+    <p style="color:#444;line-height:1.7;font-size:15px">For privacy-related queries, please contact us at: <a href="mailto:hello@yojanasearch.in" style="color:var(--saffron)">hello@yojanasearch.in</a></p>
+  </div>
+</div>
+
 </body>
 </html>
