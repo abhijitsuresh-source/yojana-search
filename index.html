@@ -216,6 +216,16 @@
     transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
   }
   .edit-answers-btn:hover { border-color: var(--saffron); color: var(--saffron); }
+
+  /* Category grid */
+  .cat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 8px; }
+  .cat-card { background: white; border: 1.5px solid var(--border); border-radius: 16px; padding: 20px 18px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 8px; }
+  .cat-card:hover { border-color: var(--saffron); box-shadow: var(--shadow); transform: translateY(-2px); }
+  .cat-icon { font-size: 32px; }
+  .cat-name { font-size: 15px; font-weight: 700; color: var(--navy); }
+  .cat-count { font-size: 12px; color: var(--slate); }
+  .cat-card.active { border-color: var(--saffron); background: #FFF8F0; }
+  @media(min-width:600px){ .cat-grid { grid-template-columns: repeat(3, 1fr); } }
 </style>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -241,17 +251,24 @@
     </div>
   </div>
   <div class="stats-bar">
-    <div class="stat"><div class="stat-num">10</div><div class="stat-label">Top Schemes</div></div>
-    <div class="stat"><div class="stat-num">₹5L+</div><div class="stat-label">Max Benefit</div></div>
-    <div class="stat"><div class="stat-num">500M+</div><div class="stat-label">People Covered</div></div>
+    <div class="stat"><div class="stat-num">47</div><div class="stat-label">Top Schemes</div></div>
+    <div class="stat"><div class="stat-num">₹1Cr</div><div class="stat-label">Max Benefit</div></div>
+    <div class="stat"><div class="stat-num">80Cr+</div><div class="stat-label">People Covered</div></div>
     <div class="stat"><div class="stat-num">2 min</div><div class="stat-label">To Get Results</div></div>
   </div>
   <div class="main">
     <div class="section-header">
-      <h2>Top 10 Government Schemes</h2>
-      <p>The highest-impact central government schemes covering health, farming, business, housing, and financial security</p>
+      <h2>Browse by Category</h2>
+      <p>Select a category to see all schemes — tap any scheme for full details</p>
     </div>
-    <div class="scheme-list" id="all-schemes-home"></div>
+    <div id="home-cat-grid"></div>
+    <div id="home-cat-schemes" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;margin-top:4px">
+        <button class="detail-back" onclick="closeHomeCategoryView()" style="margin:0">← All Categories</button>
+        <h3 id="home-cat-title" style="margin:0;font-size:18px;color:var(--navy)"></h3>
+      </div>
+      <div class="scheme-list" id="home-cat-scheme-list"></div>
+    </div>
     <div class="ad-placeholder">📢 Advertisement — Google AdSense</div>
   </div>
 </div>
@@ -260,14 +277,22 @@
   <div class="main">
     <button class="detail-back" data-action="showPage:home">← Back to Home</button>
     <div class="section-header">
-      <h2>All Schemes</h2>
-      <p>Browse all 10 schemes — click any for full details and eligibility gap analysis</p>
+      <h2>Browse Schemes</h2>
+      <p>47 central government schemes — select a category to explore</p>
     </div>
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input type="text" class="search-input" placeholder="Search by scheme name or keyword..." oninput="filterSchemes(this.value)" id="scheme-search">
+      <input type="text" class="search-input" placeholder="Search across all schemes..." oninput="filterSchemes(this.value)" id="scheme-search">
     </div>
-    <div class="scheme-list" id="browse-schemes"></div>
+    <div id="browse-search-results" class="scheme-list" style="display:none"></div>
+    <div id="browse-category-grid"></div>
+    <div id="browse-category-schemes" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <button class="detail-back" onclick="closeCategoryView()" style="margin:0">← All Categories</button>
+        <h3 id="browse-category-title" style="margin:0;font-size:20px;color:var(--navy)"></h3>
+      </div>
+      <div class="scheme-list" id="browse-category-scheme-list"></div>
+    </div>
   </div>
 </div>
 
@@ -300,7 +325,7 @@ const SCHEMES = [
   id: 'pm-kisan',
   name: 'PM Kisan Samman Nidhi',
   tagline: '₹6,000 per year direct cash to landowning farmers',
-  category: 'Agriculture',
+  category: 'Farmers',
   benefitType: 'cash',
   benefitAmount: '₹6,000/year in 3 instalments of ₹2,000',
   icon: '🌾',
@@ -376,7 +401,7 @@ const SCHEMES = [
   id: 'pm-mudra',
   name: 'PM Mudra Yojana',
   tagline: 'Collateral-free business loans up to ₹10 lakh for micro enterprises',
-  category: 'Loans & Credit',
+  category: 'Skills & Loans',
   benefitType: 'loan',
   benefitAmount: 'Up to ₹10 lakh — zero collateral required',
   icon: '💼',
@@ -454,7 +479,7 @@ const SCHEMES = [
   id: 'pm-jan-dhan',
   name: 'PM Jan Dhan Yojana',
   tagline: 'Free zero-balance bank account with insurance and overdraft',
-  category: 'Financial',
+  category: 'Financial Services',
   benefitType: 'account',
   benefitAmount: 'Free account + ₹2L insurance + ₹10K overdraft',
   icon: '🏦',
@@ -489,7 +514,7 @@ const SCHEMES = [
   id: 'pmjjby',
   name: 'PM Jeevan Jyoti Bima Yojana',
   tagline: '₹2 lakh life insurance for your family — only ₹436 per year',
-  category: 'Financial',
+  category: 'Financial Services',
   benefitType: 'insurance',
   benefitAmount: '₹2 lakh paid to family on death',
   icon: '🛡️',
@@ -525,7 +550,7 @@ const SCHEMES = [
   id: 'pmsby',
   name: 'PM Suraksha Bima Yojana',
   tagline: '₹2 lakh accident insurance — only ₹20 per year',
-  category: 'Financial',
+  category: 'Financial Services',
   benefitType: 'insurance',
   benefitAmount: '₹2L accidental death/full disability, ₹1L partial disability',
   icon: '⛑️',
@@ -560,7 +585,7 @@ const SCHEMES = [
   id: 'pm-ujjwala',
   name: 'PM Ujjwala Yojana',
   tagline: 'Free LPG gas connection for women in low-income households',
-  category: 'Food & Utilities',
+  category: 'Food & Essentials',
   benefitType: 'subsidy',
   benefitAmount: 'Free connection, cylinder, regulator, hose, burner',
   icon: '🔥',
@@ -668,6 +693,1300 @@ const SCHEMES = [
     'Second instalment ₹2,000: paid after child birth registration AND first round of vaccinations (BCG, OPV, DPT, Hep-B)',
     'If this is your second pregnancy and the child is a girl: ₹6,000 is paid in one instalment after delivery',
     'Separately, if you deliver at a government hospital, you may also receive cash under Janani Suraksha Yojana (JSY)'
+  ]
+}
+,
+
+{
+  id: 'pm-svanidhi',
+  name: 'PM SVANidhi',
+  tagline: 'Collateral-free working capital loans for street vendors',
+  category: 'Skills & Loans',
+  benefitType: 'loan',
+  benefitAmount: '₹10,000 → ₹20,000 → ₹50,000 collateral-free loans',
+  icon: '🛒',
+  iconBg: '#E8F5E9',
+  bgGradient: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+  description: 'PM SVANidhi gives street vendors access to formal credit without any collateral. Loan of ₹10,000 (Phase 1) — repay on time and get ₹20,000 (Phase 2), then ₹50,000 (Phase 3). You also earn a 7% interest subsidy credited to your account, plus cashback of up to ₹100/month for digital payments. Launched post-COVID-19 to rehabilitate displaced vendors.',
+  coverageNote: 'Specifically for vendors vending as of or before March 24, 2020. New vendors can also apply with a recommendation letter from their Urban Local Body (ULB).',
+  applyUrl: 'https://pmsvanidhi.mohua.gov.in',
+  conditions: [
+    { param: 'occupation', op: 'in', value: ['street_vendor'], label: 'Must be a street vendor or hawker by occupation', reason: 'PM SVANidhi is exclusively for people who earn their livelihood by selling goods or services on the street — food, vegetables, tea, snacks, clothing etc. Shopkeepers with permanent establishments do not qualify.', fixable: false },
+    { param: 'hasBankAccount', op: 'custom', value: true, label: 'Must have a bank account for loan disbursement', reason: 'Loan amount and 7% interest subsidy are credited directly to your bank account. Open a Jan Dhan account at any bank — free, zero balance, same day.', fixable: true, fixNote: 'Open a free Jan Dhan account at any bank branch with just your Aadhaar card. No minimum balance needed.' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Mandatory for identity verification' },
+    { name: 'Bank Account Details', desc: 'Savings account for loan and subsidy disbursement' },
+    { name: 'Vending Certificate / ULB Letter', desc: 'Letter from Urban Local Body or Town Vending Committee confirming you are a street vendor' },
+    { name: 'Mobile Number linked to Aadhaar', desc: 'For OTP and loan tracking' }
+  ],
+  steps: [
+    'Download the PM SVANidhi app or visit pmsvanidhi.mohua.gov.in',
+    'Apply online with Aadhaar and mobile OTP',
+    'Upload your vending certificate or ULB recommendation letter',
+    'Application forwarded to nearest bank or microfinance institution',
+    'On approval, ₹10,000 credited to your bank account',
+    'Repay in monthly instalments over 12 months — earns 7% interest subsidy',
+    'After full repayment, eligible for Phase 2 loan of ₹20,000',
+    'Accept digital payments at your stall to earn ₹100/month cashback'
+  ]
+},
+
+{
+  id: 'sukanya-samriddhi',
+  name: 'Sukanya Samriddhi Yojana',
+  tagline: 'Highest-interest tax-free savings account for your daughter',
+  category: 'Women & Child',
+  benefitType: 'subsidy',
+  benefitAmount: '8.2% interest p.a. — tax-free, government guaranteed',
+  icon: '👧',
+  iconBg: '#FCE4EC',
+  bgGradient: 'linear-gradient(135deg, #880E4F, #C2185B)',
+  description: 'Sukanya Samriddhi Yojana (SSY) is the highest-interest government savings scheme — 8.2% per year, fully tax-free. Open an account for your daughter before she turns 10. Deposit ₹250 to ₹1.5 lakh per year. Account matures when daughter turns 21 — full corpus including compound interest paid out tax-free. 50% withdrawal allowed at 18 for education. Government guarantees the return regardless of market conditions.',
+  coverageNote: '8.2% rate as of 2024 — much higher than FDs (6–7%) and PPF (7.1%). Maximum 2 SSY accounts per family (one per girl child). Exception for twins or triplets.',
+  applyUrl: 'https://www.indiapost.gov.in/Financial/pages/content/sukanya.aspx',
+  conditions: [
+    { param: 'hasGirlChild', op: 'custom', value: true, label: 'Must have a daughter below 10 years of age', reason: 'Account must be opened BEFORE the daughter turns 10. No income restriction — all families qualify regardless of income.', fixable: false },
+    { param: 'hasBankAccount', op: 'custom', value: true, label: 'Need a bank or Post Office account to open SSY', reason: 'SSY accounts are opened at public sector banks or any Post Office. Even without an existing bank account, any Post Office will help you open SSY directly.', fixable: true, fixNote: 'SSY accounts can be opened at any Post Office — even without an existing bank account.' }
+  ],
+  documents: [
+    { name: "Girl Child's Birth Certificate", desc: 'Mandatory — proves age is below 10 years' },
+    { name: "Parent/Guardian's Aadhaar + PAN", desc: 'Identity of account holder (parent or guardian)' },
+    { name: 'Address Proof', desc: 'Any government document showing your address' },
+    { name: 'Opening Deposit: minimum ₹250', desc: 'Maximum per year is ₹1.5 lakh' }
+  ],
+  steps: [
+    'Visit any Post Office or public sector bank (SBI, PNB, Bank of Baroda, HDFC, ICICI, Axis)',
+    'Collect and fill SSY account opening form (Form SSY-1)',
+    "Submit girl\'s birth certificate, your Aadhaar, PAN, and address proof",
+    'Make first deposit — minimum ₹250',
+    'Receive SSY passbook — record all future deposits here',
+    'Deposit ₹250–₹1.5 lakh every year for 15 years',
+    'After daughter turns 18: withdraw up to 50% for education',
+    'Account matures at 21 — full corpus paid out tax-free'
+  ]
+},
+
+{
+  id: 'pm-fasal-bima',
+  name: 'PM Fasal Bima Yojana',
+  tagline: 'Crop insurance — compensation when crops fail due to weather or pests',
+  category: 'Farmers',
+  benefitType: 'insurance',
+  benefitAmount: 'Full crop loss compensated — premium only 1.5–5%',
+  icon: '🌾',
+  iconBg: '#F9FBE7',
+  bgGradient: 'linear-gradient(135deg, #33691E, #558B2F)',
+  description: 'PM Fasal Bima Yojana (PMFBY) protects farmers from financial ruin when crops are destroyed by floods, drought, hailstorm, cyclone, unseasonal rain, pests, or disease. Farmers pay just 1.5% premium for Kharif crops, 2% for Rabi crops, and 5% for commercial crops — the government pays the rest (often 70–80%). Claims are assessed district-wide using satellite data and crop cutting experiments — no need to prove loss individually.',
+  coverageNote: 'PMFBY is voluntary since Kharif 2020. Enrollment MUST be done before sowing ends — you cannot enroll after the crop is already damaged. Check district enrollment dates at pmfby.gov.in every season.',
+  applyUrl: 'https://pmfby.gov.in',
+  conditions: [
+    { param: 'occupation', op: 'in', value: ['farmer_own', 'farmer_tenant', 'agri_labourer'], label: 'Must be a farmer — landowner, tenant farmer, or sharecropper', reason: 'Both landowner and tenant farmers can enroll. Tenant farmers need a registered tenancy agreement or letter from landowner. Agricultural labourers who do not farm their own plot are not eligible.', fixable: false },
+    { param: 'hasLand', op: 'eq', value: true, label: 'Must have cultivable land or a tenant farming agreement', reason: 'You need to show which land is being farmed, in which district, and what crop. Tenant farmers can apply with a simple notarised agreement from the landowner.', fixable: true, fixNote: 'Even without formal land records, tenant farmers can apply with a notarised agreement from the landowner. Contact your nearest CSC (Common Service Centre) for help.' }
+  ],
+  documents: [
+    { name: 'Land Records (Khasra/Khatauni) or Tenant Agreement', desc: 'Shows which land you farm. For tenant farmers — agreement letter from landowner.' },
+    { name: 'Aadhaar Card', desc: 'For identity and claim disbursement' },
+    { name: 'Bank Account (Aadhaar-linked)', desc: 'Compensation paid directly to your account' },
+    { name: 'Sowing Declaration', desc: 'What crop was sown and on what date — must be submitted before the notified last date' }
+  ],
+  steps: [
+    'Check enrollment window for your district at pmfby.gov.in — must enroll BEFORE sowing ends',
+    'Visit nearest bank, CSC (Common Service Centre), or apply online at pmfby.gov.in',
+    'Submit land records, Aadhaar, bank details, and sowing declaration',
+    'Pay your premium (1.5% for Kharif, 2% for Rabi) — government pays the rest',
+    'Receive insurance certificate and policy number',
+    'If crop damaged: notify within 72 hours via 14447 helpline or crop insurance app',
+    'Crop assessment done automatically by district-level data and satellite imagery',
+    'Compensation credited directly to your bank account within 2 months of season end'
+  ]
+},
+
+{
+  id: 'atal-pension',
+  name: 'Atal Pension Yojana',
+  tagline: 'Guaranteed ₹1,000–₹5,000/month pension for life after age 60',
+  category: 'Pension',
+  benefitType: 'pension',
+  benefitAmount: '₹1,000 to ₹5,000/month guaranteed pension from age 60',
+  icon: '👴',
+  iconBg: '#E8EAF6',
+  bgGradient: 'linear-gradient(135deg, #1A237E, #283593)',
+  description: 'Atal Pension Yojana (APY) gives unorganised sector workers a guaranteed government-backed monthly pension at 60. Choose your pension: ₹1,000, ₹2,000, ₹3,000, ₹4,000, or ₹5,000/month for life. Monthly contribution depends on your age — the younger you start, the lower you pay. Example: enroll at 25 wanting ₹5,000/month pension — pay just ₹376/month. After your death, spouse continues pension for life. After both die, the full corpus returned to nominee.',
+  coverageNote: 'APY gives a GUARANTEED fixed pension regardless of market performance — unlike NPS. The government bears the investment risk. Even if corpus falls short, government makes up the difference.',
+  applyUrl: 'https://npscra.nsdl.co.in/scheme-details.php',
+  conditions: [
+    { param: 'age', op: 'between', value: [18, 40], label: 'Age between 18 and 40 years at enrollment', reason: 'APY enrollment closes at 40 because the scheme requires minimum 20 years of contribution before pension starts at 60. The younger you start, the lower your monthly contribution.', fixable: false },
+    { param: 'hasBankAccount', op: 'custom', value: true, label: 'Must have a savings bank account — contributions auto-debited monthly', reason: 'APY contributions are automatically deducted from your savings account every month. Keep sufficient balance to avoid penalties (₹1/month per ₹100 of contribution for delays).', fixable: true, fixNote: 'Open a free Jan Dhan account at any bank — enroll for APY at the same branch on the same day.' },
+    { param: 'govtEmployee', op: 'custom', value: false, label: 'Must NOT be covered under EPF/ESIC or statutory social security', reason: 'People already covered under EPF, ESIC, or similar statutory schemes cannot enroll. Government employees are also excluded. The scheme targets unorganised sector workers with no social security cover.', fixable: false }
+  ],
+  documents: [
+    { name: 'Savings Bank Account with Mobile Banking', desc: 'APY contributions are auto-debited monthly from your account' },
+    { name: 'Aadhaar Card', desc: 'For KYC (Know Your Customer) verification' },
+    { name: 'Mobile Number linked to Aadhaar', desc: 'For OTP and annual statement' },
+    { name: 'Nominee Details', desc: 'Name, age, relationship — receives corpus after your death and spouse death' }
+  ],
+  steps: [
+    'Visit your bank branch or open mobile banking app',
+    'Look for "Atal Pension Yojana" or "APY" under investments or pension',
+    'Fill Aadhaar, mobile number, and nominee details',
+    'Choose pension amount: ₹1,000 / ₹2,000 / ₹3,000 / ₹4,000 / ₹5,000/month',
+    'App shows your required monthly contribution based on age and chosen pension',
+    'Submit — APY account opened immediately',
+    'Monthly contribution auto-debited — keep account funded',
+    'Check annual APY statement to track your pension corpus growth'
+  ]
+},
+
+{
+  id: 'pm-kaushal-vikas',
+  name: 'PM Kaushal Vikas Yojana',
+  tagline: 'Free skill training + ₹8,000 cash reward + government certificate',
+  category: 'Skills & Loans',
+  benefitType: 'training',
+  benefitAmount: 'Free training + ₹8,000 reward + NSQF certificate + placement',
+  icon: '🎓',
+  iconBg: '#E3F2FD',
+  bgGradient: 'linear-gradient(135deg, #0D47A1, #1565C0)',
+  description: 'PM Kaushal Vikas Yojana (PMKVY) provides free short-term skill training in hundreds of job roles — electrician, plumber, welder, healthcare worker, beauty therapist, retail associate, IT technician, and more. After assessment, you receive a government-recognised NSQF (National Skills Qualification Framework) certificate valid across India. Under PMKVY 4.0 (2023), special focus on AI, coding, robotics, drones, 3D printing, and green energy. After certification, ₹8,000 cash reward credited to your Aadhaar-linked bank account.',
+  coverageNote: 'PMKVY is available across 700+ sectors. Training centres (Pradhan Mantri Kaushal Kendras — PMKKs) are in almost every district. Duration ranges from 150 hours for short courses to several months for advanced programs.',
+  applyUrl: 'https://www.pmkvyofficial.org',
+  conditions: [
+    { param: 'age', op: 'between', value: [15, 45], label: 'Age between 15 and 45 years', reason: 'PMKVY targets school dropouts, unemployed youth, and adults wanting skill upgrades. Upper age limit of 45 (sometimes 55 for specific courses) ensures training leads to meaningful employment.', fixable: false },
+    { param: 'occupation', op: 'in', value: ['unemployed', 'daily_wage', 'agri_labourer', 'farmer_tenant', 'homemaker', 'farmer_own', 'street_vendor', 'artisan', 'self_employed'], label: 'Should be unemployed, underemployed, or seeking skill upgrade', reason: 'PMKVY is for those who need a skill to get a better job — school dropouts, unemployed youth, daily wage workers, homemakers re-entering the workforce. Training is free regardless of income.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Mandatory for enrollment and certificate' },
+    { name: 'Bank Account (Aadhaar-linked)', desc: 'For ₹8,000 cash reward after certification' },
+    { name: 'Educational Certificates', desc: 'Whatever you have — no minimum education required. School dropouts welcome.' },
+    { name: 'Passport-size photograph', desc: 'For training records and certificate' }
+  ],
+  steps: [
+    'Visit pmkvyofficial.org or call helpline 1800-123-9626 to find training centres near you',
+    'Visit nearest Pradhan Mantri Kaushal Kendra (PMKK) or registered training partner',
+    'Register and choose a course matching local job market demand',
+    'Attend training for required hours (150+ for short courses) — attendance mandatory',
+    'Appear for assessment by an independent Assessment Body',
+    'Receive NSQF (National Skills Qualification Framework) certificate on passing',
+    'Receive ₹8,000 cash reward in your Aadhaar-linked bank account',
+    'Training centre provides placement support — job fairs and employer tie-ups'
+  ]
+},
+
+{
+  id: 'pm-shram-yogi',
+  name: 'PM Shram Yogi Maan-dhan',
+  tagline: '₹3,000/month pension for unorganised sector workers after 60',
+  category: 'Pension',
+  benefitType: 'pension',
+  benefitAmount: '₹3,000/month guaranteed pension from age 60',
+  icon: '⚒️',
+  iconBg: '#FFF8E1',
+  bgGradient: 'linear-gradient(135deg, #E65100, #F57C00)',
+  description: 'PM Shram Yogi Maan-dhan (PM-SYM) is a voluntary pension scheme for unorganised workers — construction workers, domestic workers, weavers, rickshaw pullers, waste pickers, and others earning below ₹15,000/month. After age 60, receive ₹3,000 every month for life — guaranteed. The government matches your contribution rupee-for-rupee. Contribution as low as ₹55/month if you enroll at 18, up to ₹200/month if enrolling at 40.',
+  coverageNote: 'PM-SYM is specifically for unorganised workers earning below ₹15,000/month. Cannot be in EPF/ESIC/NPS. Distinct from APY — PM-SYM is only for informal workers, APY is for anyone in the unorganised sector.',
+  applyUrl: 'https://maandhan.in',
+  conditions: [
+    { param: 'age', op: 'between', value: [18, 40], label: 'Age between 18 and 40 years at enrollment', reason: 'Requires minimum 20 years of contribution before pension starts at 60. Enroll as early as possible — the younger you start, the lower your monthly contribution.', fixable: false },
+    { param: 'income', op: 'lte', value: 180000, label: 'Monthly income must be ₹15,000 or below (₹1.8 lakh/year)', reason: 'PM-SYM is for low-income informal workers. Those earning above ₹15,000/month should be covered by ESIC or EPF. Income is self-declared — no certificate required.', fixable: false },
+    { param: 'occupation', op: 'in', value: ['agri_labourer', 'daily_wage', 'street_vendor', 'homemaker', 'artisan', 'farmer_tenant', 'unemployed'], label: 'Must be an unorganised sector worker NOT covered by EPF/ESIC/NPS', reason: 'Construction workers, domestic helpers, street vendors, weavers, farm labourers all eligible. If employer deducts EPF or ESIC from salary, you are NOT eligible for PM-SYM.', fixable: false },
+    { param: 'hasBankAccount', op: 'custom', value: true, label: 'Must have a bank account for monthly auto-debit', reason: 'Monthly contribution is auto-debited from your Jan Dhan or savings account. Government credits its matching contribution directly into your pension corpus.', fixable: true, fixNote: 'Open a free Jan Dhan account at any bank — enrollment for PM-SYM can be done at the same CSC (Common Service Centre) on the same day.' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card linked to mobile number', desc: 'Mandatory for enrollment' },
+    { name: 'Jan Dhan / Savings Bank Account', desc: 'For auto-debit of monthly contribution' },
+    { name: 'Mobile Number', desc: 'For OTP, annual statement, and pension alerts' }
+  ],
+  steps: [
+    'Visit nearest CSC (Common Service Centre) — find one at locator.csccloud.in',
+    'Tell the operator you want PM Shram Yogi Maan-dhan (PM-SYM)',
+    'Provide Aadhaar, mobile number, and bank account details',
+    'Your monthly contribution is shown — as low as ₹55 if enrolling at 18',
+    'Government matches your contribution every month',
+    'Keep bank account funded — contribution auto-debits monthly',
+    'At 60, receive ₹3,000 every month for life directly to your bank account'
+  ]
+},
+
+{
+  id: 'stand-up-india',
+  name: 'Stand Up India',
+  tagline: '₹10 lakh to ₹1 crore loans for SC/ST and women entrepreneurs',
+  category: 'Skills & Loans',
+  benefitType: 'loan',
+  benefitAmount: '₹10 lakh to ₹1 crore bank loan at concessional rate',
+  icon: '💼',
+  iconBg: '#F3E5F5',
+  bgGradient: 'linear-gradient(135deg, #4A148C, #6A1B9A)',
+  description: 'Stand Up India provides bank loans of ₹10 lakh to ₹1 crore to SC/ST borrowers and women entrepreneurs to start a new greenfield enterprise in manufacturing, services, or trading. Each bank branch must mandatorily give at least one loan to each eligible category. Repayment: up to 7 years with up to 18-month moratorium. No third-party collateral required — backed by NCGTC credit guarantee. Designed for first-time borrowers who have never received a business loan.',
+  coverageNote: 'Stand Up India is for GREENFIELD projects only — a brand new business being started for the first time. For expanding an existing business, explore PM Mudra Yojana instead.',
+  applyUrl: 'https://www.standupmitra.in',
+  conditions: [
+    { param: 'caste', op: 'in', value: ['SC', 'ST', 'General', 'OBC'], label: 'Must be SC/ST borrower OR a woman entrepreneur (any caste)', reason: 'Exclusively for SC borrowers, ST borrowers, and women of any caste. General/OBC male applicants do not qualify — try PM Mudra instead. For partnerships or companies, at least 51% stake must be held by the eligible category.', fixable: false },
+    { param: 'age', op: 'gte', value: 18, label: 'Must be 18 years or older', reason: 'Minimum age for a valid loan contract. No upper age limit.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card and PAN Card', desc: 'Identity verification for loan processing' },
+    { name: 'Caste Certificate', desc: 'For SC/ST applicants. Women of any caste need only Aadhaar as gender proof.' },
+    { name: 'Business Plan / Project Report', desc: 'Plan showing what the business does, estimated revenue, setup cost, and repayment capacity. Templates available at standupmitra.in.' },
+    { name: 'Declaration of Greenfield Project', desc: 'Confirming this is a first-time new business' },
+    { name: 'Business Location Proof', desc: 'Lease agreement or utility bill for where business will operate' }
+  ],
+  steps: [
+    'Prepare your business plan — visit standupmitra.in for free templates and mentoring',
+    'Register on standupmitra.in — government portal matches you with a bank',
+    'Visit nearest scheduled commercial bank branch and ask for "Stand Up India" scheme',
+    'Submit application with business plan, caste/gender documents, and KYC (Know Your Customer) papers',
+    'Bank processes in 2–4 weeks — may visit your proposed business location',
+    'On approval, loan of ₹10 lakh to ₹1 crore disbursed — often in tranches',
+    'No collateral needed — backed by NCGTC credit guarantee',
+    'Repay over up to 7 years with 18-month moratorium at the start'
+  ]
+},
+
+{
+  id: 'pm-poshan',
+  name: 'PM Poshan (Mid-Day Meal)',
+  tagline: 'Free hot nutritious meal every school day for children in Classes 1–8',
+  category: 'Education',
+  benefitType: 'food',
+  benefitAmount: 'Free cooked meal every school day — 200 million children covered',
+  icon: '🍱',
+  iconBg: '#E0F7FA',
+  bgGradient: 'linear-gradient(135deg, #006064, #00838F)',
+  description: 'PM Poshan Shakti Nirman (formerly Mid-Day Meal) provides a free hot cooked meal to every child in Classes 1–8 in government and government-aided schools — making it the world\'s largest school feeding programme with 200 million children. Meal includes rice/wheat, dal, and vegetables. From 2024, pre-primary children (ages 3–5) in government Balvatikas are also included. Benefits: better school attendance, improved concentration, reduced malnutrition, and financial relief for families.',
+  coverageNote: 'PM Poshan is automatically available to ALL children in government schools — no application needed. If your child\'s school is not providing meals, complain to the District Education Officer or the PM Poshan helpline.',
+  applyUrl: 'https://pmposhan.education.gov.in',
+  conditions: [
+    { param: 'hasSchoolChild', op: 'custom', value: true, label: 'Must have a child studying in a government or government-aided school (Classes 1–8)', reason: 'PM Poshan covers only government schools and government-aided private schools. Children in fully private unaided schools are not covered. No income restriction — all children in government schools qualify.', fixable: false }
+  ],
+  documents: [
+    { name: 'No documents needed', desc: 'PM Poshan is automatically provided to all enrolled children at government schools — walk-in benefit, no paperwork required' },
+    { name: 'School Enrollment', desc: 'Your child must be enrolled in a government or government-aided school. Enroll free at nearest government school — mandatory for ages 6–14 under Right to Education Act.' }
+  ],
+  steps: [
+    'Enroll your child in any government or government-aided school — free under Right to Education (RTE)',
+    'No application needed — mid-day meal provided automatically to all students every school day',
+    'If meals not being served: speak to the Headmaster first',
+    'If unresolved: complain to Block or District Education Officer',
+    'For serious complaints: use PM Poshan grievance portal at pmposhan.education.gov.in'
+  ]
+},
+
+{
+  id: 'beti-bachao-beti-padhao',
+  name: 'Beti Bachao Beti Padhao',
+  tagline: 'Cash incentives, scholarships and support for families with girl children',
+  category: 'Women & Child',
+  benefitType: 'subsidy',
+  benefitAmount: 'State-specific cash incentives + scholarships (₹2,000–₹25,000+)',
+  icon: '🎀',
+  iconBg: '#FCE4EC',
+  bgGradient: 'linear-gradient(135deg, #BF360C, #E64A19)',
+  description: 'Beti Bachao Beti Padhao (BBBP) provides concrete financial benefits for families with girl children. Key benefits: (1) Direct cash from state governments at girl\'s birth — ₹11,000 in Haryana, ₹2,000 in Rajasthan, ₹5,000+ in many states. (2) Priority help opening Sukanya Samriddhi Yojana accounts. (3) Scholarships and free textbooks for girls in government schools. (4) Conditional cash if girl remains in school — many states give ₹5,000–₹25,000 at Class 8, 10, and 12 completion. (5) Free bicycles, uniforms, and vocational training under linked state schemes.',
+  coverageNote: 'Benefits differ significantly by state. Central government provides the campaign framework; states design and fund their own incentive programs. Bihar, Rajasthan, MP, UP, Haryana, and Gujarat have among the most generous benefits.',
+  applyUrl: 'https://wcd.nic.in/bbbp-schemes',
+  conditions: [
+    { param: 'hasGirlChild', op: 'custom', value: true, label: 'Must have a girl child (newborn to 18 years)', reason: 'All BBBP benefits are for families with daughters. Benefits vary by age: birth incentives for newborns, school incentives for girls 6–18, Sukanya Samriddhi linkage for girls under 10.', fixable: false },
+    { param: 'income', op: 'lte', value: 500000, label: 'Income below ₹5 lakh for state-level cash incentives', reason: 'Most state cash programs under BBBP target BPL and low-income families. School scholarships are often universal for girls in government schools regardless of income.', fixable: false }
+  ],
+  documents: [
+    { name: "Girl Child's Birth Certificate", desc: 'For birth incentives — register birth immediately at local Panchayat/Municipal office' },
+    { name: "Mother's Aadhaar Card", desc: 'Cash incentive disbursement is to the mother\'s account' },
+    { name: "Bank Account in Mother's Name", desc: 'For direct transfer of cash incentives' },
+    { name: 'BPL / Ration Card', desc: 'For families below poverty line — higher incentive amounts in most states' },
+    { name: 'School Enrollment Certificate', desc: 'For scholarship and school-linked incentives' }
+  ],
+  steps: [
+    'Immediately after a girl child is born: register the birth at your local Panchayat/Municipal office',
+    'Open a Sukanya Samriddhi Yojana account at nearest Post Office or bank — start saving for her future',
+    'Visit nearest Anganwadi Centre to register the girl child for ICDS (Integrated Child Development Services) nutrition benefits',
+    'Enroll the girl in nearest government school at age 6 — free under RTE',
+    'Ask your District Women and Child Development Office about state-specific BBBP cash incentives',
+    'For school scholarships: apply through the school or state scholarship portal',
+    'Track the girl child health through regular Anganwadi visits'
+  ]
+},
+
+{
+  id: 'nsap-pension',
+  name: 'National Social Assistance Programme',
+  tagline: 'Monthly pension for elderly, widows, and disabled BPL individuals',
+  category: 'Pension',
+  benefitType: 'pension',
+  benefitAmount: '₹300–₹500/month central + state top-up (total ₹1,000–₹3,500)',
+  icon: '🏛️',
+  iconBg: '#ECEFF1',
+  bgGradient: 'linear-gradient(135deg, #263238, #37474F)',
+  description: 'The National Social Assistance Programme (NSAP) provides monthly pensions to the poorest and most vulnerable. Three components: (1) Indira Gandhi National Old Age Pension (IGNOAPS) — ₹300/month for ages 60–79, ₹500/month for 80+ from central government; most states add ₹500–₹2,000 on top. (2) Indira Gandhi National Widow Pension (IGNWPS) — ₹300/month for widows aged 40–79. (3) Indira Gandhi National Disability Pension (IGNDPS) — ₹300/month for persons with 80%+ disability aged 18–79. Total with state top-up: ₹1,000–₹3,500/month depending on state.',
+  coverageNote: 'Central government pays ₹300–₹500/month. Tamil Nadu and Kerala top up to ₹1,400–₹2,000/month total. UP and Bihar are close to the central minimum. Always check your state\'s actual pension amount at the district social welfare office.',
+  applyUrl: 'https://nsap.nic.in',
+  conditions: [
+    { param: 'income', op: 'lte', value: 200000, label: 'Must be from a BPL or destitute household', reason: 'NSAP is exclusively for people with little or no regular income — classified as BPL by SECC-2011 or state BPL lists. Families with government employment, income above poverty line, or existing pensions from other schemes are not eligible.', fixable: false },
+    { param: 'age', op: 'gte', value: 40, label: 'Age 60+ for elderly pension, 40+ for widow pension, 18+ for disability pension', reason: 'Old Age Pension requires 60+. Widow Pension requires age 40–79. Disability Pension requires age 18–79 with 80%+ disability certification. Persons above 80 get ₹500/month instead of ₹300.', fixable: false },
+    { param: 'rationCard', op: 'in', value: ['AAY (Antyodaya Anna Yojana)', 'BPL', 'NFSA (National Food Security Act)'], label: 'Should have BPL or AAY ration card or be in SECC-2011 as destitute', reason: 'Beneficiary selection is from SECC-2011 or state BPL lists. BPL/AAY ration card strongly supports your application. Those without cards but listed in SECC-2011 can also apply.', fixable: true, fixNote: 'Apply for a BPL ration card at your local ration shop or Panchayat office with Aadhaar and address proof. Process takes 30–60 days.' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Mandatory — pension transferred to Aadhaar-linked bank account' },
+    { name: 'Age Proof', desc: 'Voter ID, birth certificate, or school leaving certificate showing age' },
+    { name: 'BPL/Ration Card or SECC Certificate', desc: 'Proves BPL status — the most important eligibility document' },
+    { name: 'Bank Account (Aadhaar-linked)', desc: 'Pension directly deposited. Post Office accounts also accepted.' },
+    { name: 'Disability Certificate (IGNDPS only)', desc: 'From government-recognised medical authority — must show 80%+ disability' },
+    { name: "Husband's Death Certificate (IGNWPS only)", desc: 'Official death certificate of spouse required for widow pension' }
+  ],
+  steps: [
+    'Visit your Gram Panchayat (village) or Ward Office (city) — ask for NSAP pension application form',
+    'Fill details: name, age, income, reason for pension (old age / widow / disability)',
+    'Submit with Aadhaar, BPL card, age proof, and bank account details',
+    'Panchayat forwards to Block Development Officer (BDO (Block Development Officer))',
+    'BDO (Block Development Officer) recommends to District Social Welfare Office',
+    'District office sanctions pension — process takes 1–3 months',
+    'Pension credited monthly to your Aadhaar-linked bank account',
+    'If delayed or not credited: contact BDO (Block Development Officer) or NSAP helpline at 1800-111-555'
+  ]
+},
+
+{
+  id: 'pmay-urban',
+  name: 'PMAY Urban — Housing for Urban Poor',
+  tagline: 'Interest subsidy up to ₹2.67 lakh on home loans for urban families',
+  category: 'Housing',
+  benefitType: 'subsidy',
+  benefitAmount: 'Interest subsidy ₹1.5L–₹2.67L on home loan OR grant for EWS/LIG',
+  icon: '🏙️',
+  iconBg: '#E3F2FD',
+  bgGradient: 'linear-gradient(135deg, #01579B, #0277BD)',
+  description: 'Pradhan Mantri Awaas Yojana Urban (PMAY-U) helps urban families own a pucca house through interest subsidies on home loans. The Credit Linked Subsidy Scheme (CLSS) provides upfront interest subsidy of ₹2.67 lakh (EWS/LIG) or ₹2.35 lakh (MIG-I) or ₹2.30 lakh (MIG-II) credited directly to your loan account — reducing your EMI significantly. Under the Beneficiary Led Construction (BLC) component, EWS families owning land in urban areas can get a grant of ₹1.5 lakh to build or upgrade their house.',
+  coverageNote: 'PMAY-U 2.0 was launched in 2024 with enhanced coverage. Eligibility and subsidy amounts have been revised — always check the latest at pmaymis.gov.in. The scheme requires that the house must be in the name of the woman of the household (or joint ownership).',
+  applyUrl: 'https://pmaymis.gov.in',
+  conditions: [
+    { param: 'area', op: 'eq', value: 'urban', label: 'Must live in a city, town, or urban area', reason: 'PMAY-Urban is exclusively for urban residents. Rural residents should apply under PMAY-Gramin instead. Even small towns and municipalities count as urban for this scheme.', fixable: false },
+    { param: 'income', op: 'lte', value: 1800000, label: 'Annual household income must be below ₹18 lakh (higher for MIG categories)', reason: 'EWS: below ₹3 lakh/year. LIG: ₹3–6 lakh/year. MIG-I: ₹6–12 lakh/year. MIG-II: ₹12–18 lakh/year. Different subsidy amounts apply to each category.', fixable: false },
+    { param: 'not_prev_beneficiary', op: 'custom', value: true, label: 'Must NOT already own a pucca house anywhere in India', reason: 'The applicant or any family member must not own a pucca house anywhere in India. This is verified through Aadhaar linkage. Previous beneficiaries of any central housing scheme are also excluded.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card of all family members', desc: 'Mandatory for verification and subsidy disbursement' },
+    { name: 'Income Certificate', desc: 'From employer, or self-declaration for informal workers — determines your income category (EWS/LIG/MIG)' },
+    { name: 'Home Loan Sanction Letter', desc: 'From any scheduled bank or housing finance company — required for CLSS interest subsidy' },
+    { name: 'Property Documents', desc: 'Sale deed, allotment letter, or land ownership proof' },
+    { name: 'Swearing of No Pucca House', desc: 'Self-declaration that no family member owns a pucca house anywhere in India' }
+  ],
+  steps: [
+    'Check your income category: EWS (below ₹3L), LIG (₹3–6L), MIG-I (₹6–12L), or MIG-II (₹12–18L)',
+    'Apply online at pmaymis.gov.in or visit your nearest urban local body (municipality/corporation) office',
+    'For interest subsidy (CLSS): take a home loan from any bank or housing finance company',
+    'Apply for CLSS through your bank — bank submits your subsidy claim to National Housing Bank or HUDCO',
+    'Subsidy amount (₹2.67L for EWS/LIG) is credited directly to your loan account — reducing principal and EMI',
+    'For Beneficiary Led Construction (BLC): apply at your municipality with land ownership proof',
+    'Grant of ₹1.5 lakh released in instalments as construction progresses — verified by geotagged photos',
+    'Ensure the house is registered in the name of the woman of the household or as joint ownership'
+  ]
+},
+
+{
+  id: 'kisan-credit-card',
+  name: 'Kisan Credit Card',
+  tagline: 'Flexible revolving credit up to ₹3 lakh at 4% interest for farmers',
+  category: 'Farmers',
+  benefitType: 'loan',
+  benefitAmount: 'Credit up to ₹3 lakh at 4% interest (with government interest subvention)',
+  icon: '💳',
+  iconBg: '#E8F5E9',
+  bgGradient: 'linear-gradient(135deg, #1B5E20, #388E3C)',
+  description: 'Kisan Credit Card (KCC) gives farmers a flexible revolving credit line — like a bank overdraft — to meet farming expenses at any time during the crop season. Credit limit up to ₹3 lakh for short-term crop loans at just 4% interest per year (after 3% government interest subvention, on timely repayment). No need to go to the bank every time — withdraw as needed using ATM/RuPay card. Covers: seeds, fertilisers, pesticides, labour wages, farm equipment hire, post-harvest expenses, and family household needs. Also covers crop insurance premium automatically.',
+  coverageNote: 'The 4% interest rate applies on loans up to ₹3 lakh when repaid on time. Beyond ₹3 lakh, normal bank rates apply. KCC also covers allied activities like animal husbandry and fisheries — not just crop farming.',
+  applyUrl: 'https://www.pmkisan.gov.in/kccform.aspx',
+  conditions: [
+    { param: 'occupation', op: 'in', value: ['farmer_own', 'farmer_tenant', 'agri_labourer'], label: 'Must be a farmer — landowner, tenant farmer, sharecropper, or allied activity worker', reason: 'KCC covers farmers who own land, tenant farmers, oral lessees, sharecroppers, and also fishermen and animal husbandry workers. Agricultural labourers who do not have their own farming operation may not qualify for crop loans but may access KCC for allied activities.', fixable: false },
+    { param: 'hasBankAccount', op: 'custom', value: true, label: 'Must have a bank account — KCC is issued as a bank card', reason: 'KCC is a bank-issued revolving credit facility. You need a savings account at the issuing bank. The KCC operates like an overdraft linked to your account.', fixable: true, fixNote: 'Open a savings account at any cooperative bank, regional rural bank, or commercial bank near you. You can apply for KCC at the same visit.' },
+    { param: 'not_defaulter', op: 'custom', value: true, label: 'Must NOT have any existing loan defaults with banks', reason: 'Banks check CIBIL/credit history before issuing KCC. Existing defaulters are rejected. Settle any outstanding dues before applying.', fixable: true, fixNote: 'If you have old dues, approach the bank to settle under one-time settlement scheme. Clean credit history is required for KCC approval.' }
+  ],
+  documents: [
+    { name: 'Land Records (Khasra/Patta/RoR)', desc: 'For own land. Tenant farmers need tenancy agreement or landowner consent letter.' },
+    { name: 'Aadhaar Card + PAN Card', desc: 'For KYC (Know Your Customer) verification' },
+    { name: 'Passport-size photograph', desc: 'For bank records and KCC card issuance' },
+    { name: 'Crop Details', desc: 'What crop you are growing, area under cultivation, estimated cost of cultivation' }
+  ],
+  steps: [
+    'Visit your nearest cooperative bank, regional rural bank (RRB), or any commercial bank branch',
+    'Ask for the "Kisan Credit Card" application form',
+    'Submit land records, Aadhaar, PAN, and crop cultivation details',
+    'Bank assesses credit limit based on land area, crop type, and estimated cultivation cost',
+    'KCC issued within 2 weeks — includes a RuPay debit card for ATM withdrawals',
+    'Withdraw as needed throughout the crop season using KCC card at ATM or bank',
+    'Repay after harvest — you have 12 months from withdrawal to repay at 4% interest',
+    'Timely repayment ensures continued access and automatic crop insurance coverage',
+    'PM Kisan beneficiaries can get KCC directly through pmkisan.gov.in without visiting a bank'
+  ]
+},
+
+{
+  id: 'pm-garib-kalyan-anna',
+  name: 'PM Garib Kalyan Anna Yojana',
+  tagline: '5 kg free ration every month for 80 crore people',
+  category: 'Food & Essentials',
+  benefitType: 'subsidy',
+  benefitAmount: '5 kg free rice/wheat per person per month — no cost',
+  icon: '🌾',
+  iconBg: '#FFF9C4',
+  bgGradient: 'linear-gradient(135deg, #F57F17, #F9A825)',
+  description: 'PM Garib Kalyan Anna Yojana (PMGKAY) provides 5 kg of free rice or wheat every month to every person covered under the National Food Security Act (NFSA). Since January 2023, this free allocation has been merged into the regular NFSA entitlement — so NFSA/Priority Household card holders now get their full 5 kg/month at zero cost (previously they paid ₹1–3/kg). Antyodaya Anna Yojana (AAY) families get 35 kg/month free. This benefits approximately 80 crore (800 million) people across India.',
+  coverageNote: 'PMGKAY is automatically delivered through your existing ration card at your local Fair Price Shop (ration shop) every month. No separate application needed. If you do not have a ration card, apply for one at your local PDS office.',
+  applyUrl: 'https://dfpd.gov.in',
+  conditions: [
+    { param: 'rationCard', op: 'in', value: ['AAY (Antyodaya Anna Yojana)', 'BPL', 'NFSA (National Food Security Act)'], label: 'Must hold a valid NFSA/Priority Household or AAY ration card', reason: 'Free ration is distributed only to households listed under the National Food Security Act — Priority Household and Antyodaya Anna Yojana categories. APL card holders and those without ration cards do not receive free ration.', fixable: true, fixNote: 'Apply for a ration card at your local PDS office or online at your state food portal. Process takes 15-45 days.' }
+  ],
+  documents: [
+    { name: 'Ration Card (NFSA/AAY/BPL)', desc: 'Mandatory — bring this to the Fair Price Shop (ration shop) every month' },
+    { name: 'Aadhaar Card', desc: 'For biometric verification at ration shop — Aadhaar must be linked to ration card' }
+  ],
+  steps: [
+    'Visit your designated Fair Price Shop (ration shop) every month',
+    'Carry your ration card and Aadhaar card',
+    'Verify identity using biometric (fingerprint) or OTP on the shop PoS machine',
+    'Receive 5 kg of rice or wheat per family member — completely free',
+    'AAY (Antyodaya Anna Yojana) families receive 35 kg/month free',
+    'If your Aadhaar is not linked to ration card: visit your ration shop or block office immediately to link it',
+    'If ration is denied or short: file complaint at your state food department or call 1967 helpline'
+  ]
+},
+
+{
+  id: 'swachh-bharat-toilet',
+  name: 'Swachh Bharat Mission — Free Toilet',
+  tagline: '₹12,000 grant to build a toilet for households without one',
+  category: 'Housing',
+  benefitType: 'cash',
+  benefitAmount: '₹12,000 grant for toilet construction (₹10,000 + ₹2,000 from states)',
+  icon: '🚽',
+  iconBg: '#E8F5E9',
+  bgGradient: 'linear-gradient(135deg, #1A237E, #3949AB)',
+  description: 'Swachh Bharat Mission (Grameen) Phase 2 provides ₹12,000 cash grant to rural households that do not have a toilet — to construct an individual household latrine (IHHL). The central government contributes ₹10,000 and most state governments add ₹2,000. Money is released directly to your bank account in two instalments: ₹6,000 before construction (to buy materials) and ₹6,000 after construction is verified by geotagged photo. Urban households can apply under Swachh Bharat Mission (Urban) through their municipal corporation.',
+  coverageNote: 'Priority is given to BPL families, SC/ST households, small and marginal farmers, and women-headed households. If you have already received a toilet grant under any previous scheme (Nirmal Bharat Abhiyan etc.), you are not eligible again.',
+  applyUrl: 'https://sbm.gov.in/sbmReport/home.aspx',
+  conditions: [
+    { param: 'area', op: 'eq', value: 'rural', label: 'Must live in a rural area (SBM-Grameen is for rural households)', reason: 'Swachh Bharat Mission Grameen is for rural households without toilets. Urban households should apply under SBM-Urban through their municipal corporation — similar benefit but different process.', fixable: false },
+    { param: 'income', op: 'lte', value: 300000, label: 'Should be a low-income household without an existing toilet', reason: 'The scheme targets BPL families and low-income households that cannot afford to build a toilet on their own. Having an existing toilet on the property disqualifies the household.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'For identity and direct bank transfer of grant' },
+    { name: 'Bank Account (Aadhaar-linked)', desc: 'Grant released directly to your account in two instalments' },
+    { name: 'BPL Card / Ration Card', desc: 'Helps establish priority eligibility' },
+    { name: 'Photo of current toilet situation', desc: 'Gram Panchayat may require proof that no toilet currently exists on the property' }
+  ],
+  steps: [
+    'Visit your Gram Panchayat office and tell them you want to apply for a free toilet under Swachh Bharat Mission',
+    'Gram Panchayat verifies that your household has no existing toilet',
+    'Submit Aadhaar card and bank account details',
+    'First instalment of ₹6,000 credited to your bank account',
+    'Construct your toilet using the grant — Gram Panchayat can guide on basic design',
+    'Take geotagged photos of the completed toilet and submit to Gram Panchayat',
+    'After verification, second instalment of ₹6,000 credited to your account',
+    'Register your toilet as Open Defecation Free (ODF) with the Gram Panchayat'
+  ]
+}
+,
+
+{
+  id: 'mgnregs',
+  name: 'MGNREGS — Mahatma Gandhi NREGA',
+  tagline: 'Guaranteed 100 days of paid work per year for rural households',
+  category: 'Employment',
+  benefitType: 'cash',
+  benefitAmount: '100 days guaranteed work at ₹220–₹357/day (state-wise)',
+  icon: '⛏️',
+  iconBg: '#FFF3E0',
+  bgGradient: 'linear-gradient(135deg, #BF360C, #E64A19)',
+  description: 'MGNREGS (Mahatma Gandhi National Rural Employment Guarantee Scheme) is a legal right — every rural household is legally entitled to 100 days of unskilled manual work per year at the government-notified wage rate (₹220–₹357/day depending on state). Work is provided within 5km of your home, or you get an unemployment allowance. Payment is directly to your bank/Post Office account within 15 days of work. Work includes: road construction, well digging, pond desilting, land levelling, tree plantation. Women get priority — at least 33% of workers must be women.',
+  coverageNote: 'MGNREGS is a demand-driven scheme — you must apply for work. If work is not provided within 15 days of application, you are entitled to an unemployment allowance. States with higher wages: Haryana (₹357), Karnataka (₹349), Kerala (₹333). States with lower wages: UP (₹230), Bihar (₹228).',
+  applyUrl: 'https://nrega.nic.in',
+  conditions: [
+    { param: 'area', op: 'eq', value: 'rural', label: 'Must live in a rural area', reason: 'MGNREGS is exclusively for rural households. Urban residents are not covered.', fixable: false },
+    { param: 'age', op: 'gte', value: 18, label: 'Must be 18 years or older', reason: 'Any adult (18+) from a rural household can register for MGNREGS. No upper age limit — elderly people can also register and request work suited to their ability.', fixable: false },
+    { param: 'occupation', op: 'in', value: ['agri_labourer', 'daily_wage', 'farmer_own', 'farmer_tenant', 'homemaker', 'unemployed', 'street_vendor', 'artisan', 'self_employed'], label: 'Must be willing to do unskilled manual work', reason: 'MGNREGS provides unskilled manual labour — digging, carrying, levelling, plantation. It is designed for those who need work and are physically able to do manual labour. Government employees are not eligible.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'For identity and wage payment — must be linked to bank account' },
+    { name: 'Bank or Post Office Account', desc: 'Wages paid directly — must be in your name and Aadhaar-linked' },
+    { name: 'Ration Card or address proof', desc: 'To establish household membership and rural residence' },
+    { name: 'Job Card', desc: 'Issued free by Gram Panchayat — the most important MGNREGS document. Get this first.' }
+  ],
+  steps: [
+    'Visit your Gram Panchayat office and apply for a Job Card — free, issued within 15 days',
+    'Job Card lists all adult members of your household eligible for MGNREGS work',
+    'When you need work, submit a written application to the Gram Panchayat requesting employment',
+    'Gram Panchayat must provide work within 15 days of your application',
+    'Work site will be within 5km of your village — if farther, you get 10% extra wages',
+    'Work for up to 100 days in a financial year (April–March)',
+    'Wages credited directly to your bank account within 15 days of completing work',
+    'If work is not provided within 15 days: you are entitled to an unemployment allowance',
+    'Check your job card, work history, and payments online at nrega.nic.in'
+  ]
+},
+
+{
+  id: 'janani-suraksha',
+  name: 'Janani Suraksha Yojana',
+  tagline: 'Cash incentive of ₹1,400 for delivering your baby at a government hospital',
+  category: 'Women & Child',
+  benefitType: 'cash',
+  benefitAmount: '₹1,400 (rural) or ₹1,000 (urban) cash for institutional delivery',
+  icon: '🏥',
+  iconBg: '#FCE4EC',
+  bgGradient: 'linear-gradient(135deg, #880E4F, #AD1457)',
+  description: 'Janani Suraksha Yojana (JSY) gives cash directly to pregnant women who deliver their baby at a government hospital or accredited private facility — to encourage safe institutional delivery and reduce maternal and infant mortality. Cash: ₹1,400 for rural women, ₹1,000 for urban women in Low Performing States (LPS: UP, Bihar, Rajasthan, MP, Jharkhand, Odisha, J&K, Chhattisgarh, Assam, Uttarakhand). ₹700 rural and ₹600 urban in High Performing States. Additionally, your ASHA worker gets ₹600 for facilitating the delivery. JSY cash is on top of any PMMVY benefit you may receive.',
+  coverageNote: 'JSY has no income restriction — all pregnant women who deliver at government or accredited facilities qualify, regardless of BPL status. In Low Performing States, even APL women qualify.',
+  applyUrl: 'https://nhm.gov.in/index1.php?lang=1&level=3&sublinkid=841&lid=309',
+  conditions: [
+    { param: 'gender', op: 'eq', value: 'female', label: 'Must be a pregnant woman delivering at a government or accredited facility', reason: 'JSY cash is paid to the mother at the time of delivery at a government hospital, community health centre, or NABH-accredited private facility. Home deliveries do not qualify.', fixable: false },
+    { param: 'age', op: 'gte', value: 19, label: 'Mother should be 19 years or older', reason: 'While JSY does not have a strict age cutoff in all states, the scheme is intended for adult mothers. In some states, age below 19 may disqualify for cash but healthcare remains free.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'For identity and direct bank payment of JSY cash' },
+    { name: "Bank Account in Mother's Name", desc: "Cash paid directly to the mother's account — must be Aadhaar-linked" },
+    { name: 'ANC Card / MCP Card', desc: 'Mother and Child Protection Card showing antenatal check-up records' },
+    { name: 'JSY Registration', desc: 'Register with your ASHA worker or nearest government health facility as early as possible in pregnancy' }
+  ],
+  steps: [
+    'Register your pregnancy with your ASHA worker or nearest government health sub-centre as soon as possible',
+    'Attend all antenatal check-ups at a government facility — at least 4 check-ups recommended',
+    'Your ASHA worker will help you plan for institutional delivery at a government hospital',
+    'Deliver your baby at a government hospital, CHC (Community Health Centre), or accredited private facility',
+    'Inform the hospital staff you want the JSY cash benefit — they will fill the form',
+    'Cash of ₹1,400 (rural LPS) or applicable amount credited to your bank account within days of delivery',
+    'Your ASHA worker also receives ₹600 for facilitating the institutional delivery',
+    'Also apply for PMMVY (₹5,000) if you have not already — both benefits can be received together'
+  ]
+},
+
+{
+  id: 'ddu-gky',
+  name: 'DDU-GKY Skill Training',
+  tagline: 'Free residential skill training + guaranteed job placement for rural youth',
+  category: 'Skills & Loans',
+  benefitType: 'training',
+  benefitAmount: 'Free residential training + placement in job paying ₹6,000+/month',
+  icon: '🏭',
+  iconBg: '#E8F5E9',
+  bgGradient: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+  description: 'Deen Dayal Upadhyaya Grameen Kaushalya Yojana (DDU-GKY) provides free residential skill training to rural youth aged 15–35 with a guaranteed job placement after training. Unlike PMKVY, DDU-GKY is residential — accommodation, food, and training are all free. Training duration: 3 months to 1 year depending on trade. Sectors: IT, retail, hospitality, healthcare, construction, apparel, banking. Post-training, DDU-GKY mandates job placement — trainers are paid only after trainees are placed. Minimum placement salary: ₹6,000/month. Post-placement support for 1 year.',
+  coverageNote: 'DDU-GKY has a special focus on SC/ST youth, minorities, women, and persons with disabilities — 50% of seats reserved. This scheme often has vacancies — check with your Block Development Officer (BDO) as training batches run throughout the year.',
+  applyUrl: 'https://ddugky.gov.in',
+  conditions: [
+    { param: 'age', op: 'between', value: [15, 35], label: 'Age between 15 and 35 years', reason: 'DDU-GKY targets rural youth who are school dropouts or underemployed and need skill training to get formal employment. The age cap of 35 ensures the training leads to productive employment years.', fixable: false },
+    { param: 'area', op: 'eq', value: 'rural', label: 'Must be from a rural household', reason: 'DDU-GKY is exclusively for rural youth from rural households. Urban youth can access PMKVY instead.', fixable: false },
+    { param: 'income', op: 'lte', value: 300000, label: 'From a low-income or BPL family', reason: 'DDU-GKY prioritises youth from BPL families, MGNREGS households, SC/ST families, and those below ₹3 lakh annual income.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Mandatory for enrollment and certificate' },
+    { name: 'Age Proof', desc: 'Birth certificate, school leaving certificate, or Aadhaar' },
+    { name: 'Rural Residence Proof', desc: 'Ration card, voter ID, or Panchayat certificate showing rural address' },
+    { name: 'Educational Certificate', desc: 'Whatever you have — no minimum education required. Illiterate youth can also enroll for certain trades.' },
+    { name: 'Bank Account', desc: 'For post-placement salary and stipend during training' }
+  ],
+  steps: [
+    'Contact your Block Development Officer (BDO) or Gram Panchayat to find active DDU-GKY training batches in your area',
+    'Visit the DDU-GKY training centre or Project Implementing Agency (PIA) directly',
+    'Register and choose a trade suited to your interest and local job market',
+    'Enroll in the residential training program — accommodation, food, and training are FREE',
+    'Complete the training (3 months to 1 year) with mandatory attendance',
+    'Appear for assessment — receive government-recognised skill certificate on passing',
+    'Training centre places you in a job — minimum salary ₹6,000/month guaranteed',
+    'Post-placement support provided for 1 year — training centre tracks your employment'
+  ]
+},
+
+{
+  id: 'pmegp',
+  name: 'PMEGP — Enterprise Loan up to ₹50 Lakh',
+  tagline: 'Government subsidy of 15–35% on loans up to ₹50 lakh for new businesses',
+  category: 'Skills & Loans',
+  benefitType: 'loan',
+  benefitAmount: '15–35% government subsidy on project cost up to ₹50 lakh',
+  icon: '🏗️',
+  iconBg: '#E8EAF6',
+  bgGradient: 'linear-gradient(135deg, #311B92, #4527A0)',
+  description: 'PM Employment Generation Programme (PMEGP) helps new entrepreneurs start manufacturing or service businesses with a government subsidy of 15–35% of the project cost — you only need to arrange 5–10% as your own contribution, rest is bank loan. Maximum project cost: ₹50 lakh for manufacturing, ₹20 lakh for service sector. Subsidy: 15% for urban general category, 25% for urban SC/ST/OBC/women/minority/differently-abled/ex-servicemen, 25% for rural general, 35% for rural SC/ST/OBC/women. The subsidy is non-repayable — you only repay the loan portion.',
+  coverageNote: 'PMEGP is only for NEW projects — existing businesses cannot apply. The enterprise must be in your name. Implemented by KVIC (Khadi and Village Industries Commission), state KVIBs, and District Industries Centres (DICs).',
+  applyUrl: 'https://www.kviconline.gov.in/pmegpeportal',
+  conditions: [
+    { param: 'age', op: 'gte', value: 18, label: 'Must be 18 years or older', reason: 'Minimum age for a valid loan contract. No upper age limit for PMEGP.', fixable: false },
+    { param: 'income', op: 'lte', value: 500000, label: 'Should not be from a high-income household — targets first-time entrepreneurs', reason: 'PMEGP targets unemployed youth and traditional artisans wanting to start a business. There is no strict income limit, but the scheme is designed for those who cannot otherwise access capital.', fixable: false },
+    { param: 'not_defaulter', op: 'custom', value: true, label: 'Must NOT be an existing bank loan defaulter', reason: 'Banks check CIBIL score before approving PMEGP loans. Existing defaulters will be rejected. Settle outstanding dues before applying.', fixable: true, fixNote: 'Check your CIBIL score free at paisabazaar.com. If you have defaults, try to settle them before applying for PMEGP.' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card + PAN Card', desc: 'For KYC and subsidy disbursement' },
+    { name: 'Educational/Skill Certificate', desc: '8th pass minimum for manufacturing. Relevant skill or EDP (Entrepreneurship Development Programme) training certificate preferred.' },
+    { name: 'Project Report', desc: 'Detailed business plan showing product/service, market, cost of setup, working capital needs, and revenue projections. KVIC offices provide guidance.' },
+    { name: 'Caste Certificate', desc: 'For SC/ST/OBC — to get higher subsidy (25–35% instead of 15–25%)' },
+    { name: 'Rural/Urban address proof', desc: 'Determines subsidy percentage — rural applicants get 10% higher subsidy' }
+  ],
+  steps: [
+    'Apply online at kviconline.gov.in/pmegpeportal — create account and fill application form',
+    'Prepare a detailed project report — KVIC district office or District Industries Centre (DIC) can help',
+    'Application is forwarded to KVIC, KVIB, or DIC based on your location and project type',
+    'Attend an Entrepreneurship Development Programme (EDP) — mandatory 2-week training before loan sanction',
+    'Application forwarded to a bank for loan sanction',
+    'Bank sanctions loan — your own contribution is 5% (general) or 10% (SC/ST/special categories) of project cost',
+    'Government subsidy (15–35%) kept in a separate account for 3 years — released after lock-in period',
+    'Use loan to set up enterprise — KVIC monitors progress',
+    'Repay only the bank loan portion — subsidy is yours to keep'
+  ]
+},
+
+{
+  id: 'scss',
+  name: 'Senior Citizen Savings Scheme',
+  tagline: 'Highest safe investment rate of 8.2% for senior citizens',
+  category: 'Pension',
+  benefitType: 'subsidy',
+  benefitAmount: '8.2% interest per year — quarterly payout — government guaranteed',
+  icon: '🏦',
+  iconBg: '#E8EAF6',
+  bgGradient: 'linear-gradient(135deg, #1A237E, #1565C0)',
+  description: 'Senior Citizen Savings Scheme (SCSS) is the safest and highest-return investment for people aged 60 and above — offering 8.2% interest per year (as of 2024), paid quarterly directly to your bank account. Deposit between ₹1,000 and ₹30 lakh. Tenure: 5 years, extendable by 3 more years. Full capital guaranteed by Government of India. Interest income qualifies for tax deduction under Section 80C up to ₹1.5 lakh. Premature withdrawal allowed after 1 year (with penalty). Available at all Post Offices and major banks.',
+  coverageNote: 'SCSS interest rate is reviewed quarterly by the government. 8.2% as of Jan-Mar 2024 — significantly higher than bank FDs (6–7%). Only one account per individual (or jointly with spouse). Maximum deposit ₹30 lakh per individual.',
+  applyUrl: 'https://www.indiapost.gov.in/Financial/pages/content/scss.aspx',
+  conditions: [
+    { param: 'age', op: 'gte', value: 60, label: 'Must be 60 years or older (55+ for VRS retirees)', reason: 'SCSS is exclusively for senior citizens aged 60+. Exception: those who retired under VRS or superannuation between 55–60 can also invest within 1 month of receiving retirement benefits.', fixable: false },
+    { param: 'hasBankAccount', op: 'custom', value: true, label: 'Must have a bank or Post Office account', reason: 'Quarterly interest is paid directly to your savings account. SCSS can be opened at any Post Office or major bank branch.', fixable: true, fixNote: 'SCSS can be opened at any Post Office — no existing bank account needed. Post Office will help you set up everything.' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Identity and KYC verification' },
+    { name: 'Age Proof', desc: 'Voter ID, passport, birth certificate, or Aadhaar showing age 60+' },
+    { name: 'PAN Card', desc: 'Required for deposits above ₹50,000 and for TDS on interest' },
+    { name: 'Cheque / Demand Draft', desc: 'For initial deposit — minimum ₹1,000, maximum ₹30 lakh' },
+    { name: 'Retirement/VRS Documents', desc: 'Only required if applying between ages 55–60 under VRS/superannuation' }
+  ],
+  steps: [
+    'Visit any Post Office or bank branch (SBI, Bank of Baroda, PNB, Canara Bank, HDFC, ICICI, Axis, etc.)',
+    'Ask for Senior Citizen Savings Scheme (SCSS) account opening form',
+    'Submit Aadhaar, age proof, PAN card, and initial deposit (minimum ₹1,000)',
+    'Account opened immediately — you receive a passbook',
+    'Interest at 8.2% per year credited quarterly to your linked savings account',
+    'After 5 years, choose to extend for 3 more years OR withdraw full amount',
+    'Premature withdrawal: after 1 year with 1.5% penalty; after 2 years with 1% penalty',
+    'Declare SCSS interest in your income tax return — eligible for 80C deduction up to ₹1.5 lakh'
+  ]
+},
+
+{
+  id: 'rashtriya-vayoshri',
+  name: 'Rashtriya Vayoshri Yojana',
+  tagline: 'Free assistive devices for elderly BPL persons — spectacles, hearing aids, wheelchairs',
+  category: 'Pension',
+  benefitType: 'subsidy',
+  benefitAmount: 'Free walking sticks, spectacles, hearing aids, wheelchairs — worth ₹8,000–₹30,000',
+  icon: '♿',
+  iconBg: '#ECEFF1',
+  bgGradient: 'linear-gradient(135deg, #37474F, #546E7A)',
+  description: 'Rashtriya Vayoshri Yojana (RVY) provides free assistive devices and appliances to senior citizens (60+) from BPL families who have age-related disabilities. Devices provided: walking sticks, elbow crutches, walkers/crutches, tripods/quadpods, hearing aids, spectacles, artificial dentures, and wheelchair. Distribution is done through camps organised by ALIMCO (Artificial Limbs Manufacturing Corporation) at the district level. Each beneficiary receives devices worth ₹8,000–₹30,000 completely free.',
+  coverageNote: 'RVY distribution happens through camps — check with your District Social Welfare Office or visit alimco.in for upcoming camp dates in your district. SC/ST elderly get priority.',
+  applyUrl: 'https://www.alimco.in/rvy.aspx',
+  conditions: [
+    { param: 'age', op: 'gte', value: 60, label: 'Must be 60 years or older', reason: 'RVY targets senior citizens with age-related disabilities — reduced vision, hearing loss, loss of mobility. Only persons aged 60+ qualify.', fixable: false },
+    { param: 'income', op: 'lte', value: 200000, label: 'Must be from a BPL household', reason: 'RVY is exclusively for senior citizens from Below Poverty Line families. BPL/AAY ration card or SECC-2011 listing is the primary proof.', fixable: false },
+    { param: 'rationCard', op: 'in', value: ['AAY (Antyodaya Anna Yojana)', 'BPL', 'NFSA (National Food Security Act)'], label: 'Must hold a BPL/AAY ration card', reason: 'BPL status is verified through ration card or SECC-2011 data. AAY and BPL card holders get priority. NFSA card holders also qualify.', fixable: true, fixNote: 'Apply for a BPL ration card at your local Panchayat office if you do not have one.' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Mandatory for identity' },
+    { name: 'BPL/AAY Ration Card', desc: 'Proof of BPL status — most important document' },
+    { name: 'Age Proof', desc: 'Voter ID, birth certificate, or Aadhaar showing age 60+' },
+    { name: 'Medical Certificate', desc: 'From a government doctor confirming the disability or assistive device requirement' },
+    { name: 'Passport-size photograph', desc: 'For camp registration records' }
+  ],
+  steps: [
+    'Check upcoming RVY distribution camps in your district at alimco.in or contact your District Social Welfare Officer',
+    'Alternatively, apply through your Gram Panchayat or municipality to be added to the beneficiary list',
+    'Obtain a medical certificate from a government doctor stating your disability and required device',
+    'Register at the camp with Aadhaar, BPL card, age proof, medical certificate, and photograph',
+    'ALIMCO technicians assess your needs and fit the appropriate device on the spot',
+    'Receive spectacles, hearing aid, walking stick, wheelchair, or other devices — completely free',
+    'Follow-up maintenance and repair services also provided at camps'
+  ]
+},
+
+{
+  id: 'pm-yasasvi',
+  name: 'PM YASASVI Scholarship',
+  tagline: '₹75,000–₹1,25,000/year scholarship for OBC/EBC/DNT students',
+  category: 'Education',
+  benefitType: 'cash',
+  benefitAmount: '₹75,000/year (Classes 9–10) or ₹1,25,000/year (Classes 11–12 and above)',
+  icon: '📚',
+  iconBg: '#E3F2FD',
+  bgGradient: 'linear-gradient(135deg, #0D47A1, #1976D2)',
+  description: 'PM YASASVI (Young Achievers Scholarship Award Scheme for Vibrant India) provides scholarships to students from OBC, EBC (Economically Backward Classes), and DNT (De-notified, Nomadic, Semi-Nomadic Tribes) communities to study at top schools and colleges. Scholarship amounts: ₹75,000/year for students in Classes 9–10; ₹1,25,000/year for Classes 11–12 and undergraduate. Selection is through the PM YASASVI Entrance Test (YET) conducted by NTA. The scholarship covers tuition, hostel, textbooks, and living expenses.',
+  coverageNote: 'PM YASASVI replaced the older pre-matric and post-matric OBC scholarship schemes in 2022. The NTA entrance test (YET) is held once a year — check nta.ac.in for dates. Only students in Class 9 and Class 11 are eligible to appear for the test as new entrants.',
+  applyUrl: 'https://scholarships.gov.in',
+  conditions: [
+    { param: 'caste', op: 'in', value: ['OBC', 'SC', 'ST'], label: 'Must belong to OBC, EBC, or DNT community', reason: 'PM YASASVI is exclusively for students from OBC (Other Backward Classes), EBC (Economically Backward Classes), and DNT (De-notified, Nomadic, Semi-Nomadic Tribes) communities. SC/ST students have separate dedicated scholarship schemes.', fixable: false },
+    { param: 'income', op: 'lte', value: 250000, label: 'Family income must be below ₹2.5 lakh per year', reason: 'PM YASASVI targets students from economically disadvantaged OBC/EBC/DNT families. The income ceiling of ₹2.5 lakh per year ensures the scholarship reaches those who truly need it.', fixable: false },
+    { param: 'age', op: 'between', value: [14, 25], label: 'Must be a student in Class 9–12 or undergraduate (age 14–25)', reason: 'PM YASASVI covers students from Class 9 through undergraduate level. Entry is typically at Class 9 (age ~14) and at Class 11 (age ~16). Undergraduate students can continue the scholarship till degree completion.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Mandatory for scholarship registration at scholarships.gov.in' },
+    { name: 'OBC/EBC/DNT Caste Certificate', desc: 'Issued by competent authority (SDM, Tehsildar) — mandatory for eligibility verification' },
+    { name: 'Income Certificate', desc: 'From tehsildar or competent authority showing family income below ₹2.5 lakh/year' },
+    { name: 'School/College Enrollment Proof', desc: 'Current fee receipt and enrollment certificate from institution' },
+    { name: "Bank Account (student name)", desc: "Scholarship credited directly to student Aadhaar-linked account" }
+  ],
+  steps: [
+    'Register on the National Scholarship Portal at scholarships.gov.in',
+    'Check NTA website (nta.ac.in) for PM YASASVI Entrance Test (YET) dates and registration',
+    'Register for the YET exam — fee is nominal, waived for BPL students',
+    'Appear for the computer-based test — covers Mathematics, Science, Social Science, and General Awareness',
+    'Selected students are notified via NTA and National Scholarship Portal',
+    'Upload required documents: caste certificate, income certificate, enrollment proof, bank details',
+    'Scholarship of ₹75,000/year (Class 9–10) or ₹1,25,000/year (Class 11 and above) credited annually',
+    'Renew scholarship each year by uploading updated enrollment and marks certificate'
+  ]
+},
+
+{
+  id: 'national-scholarship',
+  name: 'National Scholarship Portal — Pre/Post Matric',
+  tagline: 'Central government scholarships for SC/ST/OBC/minority students',
+  category: 'Education',
+  benefitType: 'cash',
+  benefitAmount: '₹1,000–₹1,80,000/year depending on course and category',
+  icon: '🎒',
+  iconBg: '#FFF9C4',
+  bgGradient: 'linear-gradient(135deg, #F57F17, #F9A825)',
+  description: 'The National Scholarship Portal (NSP) at scholarships.gov.in hosts all central government scholarship schemes in one place. Key schemes: (1) Pre-Matric Scholarship for SC/ST/OBC/Minorities (Classes 1–10): ₹1,000–₹10,000/year. (2) Post-Matric Scholarship for SC/ST/OBC (Classes 11 onwards including graduation, post-graduation): covers full tuition + ₹20,000–₹1,80,000/year for residential courses. (3) Merit-cum-Means Scholarship for minorities: up to ₹30,000/year. All scholarships are paid directly to student bank accounts — no middlemen.',
+  coverageNote: 'Each scholarship scheme on NSP has different income limits and benefit amounts. SC/ST post-matric scholarships are among the most generous — full tuition reimbursement plus maintenance allowance. Apply every year before the deadline (usually September–November).',
+  applyUrl: 'https://scholarships.gov.in',
+  conditions: [
+    { param: 'caste', op: 'in', value: ['SC', 'ST', 'OBC'], label: 'Must belong to SC, ST, or OBC community (or minority religion)', reason: 'Most NSP scholarships are category-specific: Pre/Post Matric scholarships for SC, separate ones for ST, OBC, and Minorities. Each has different income limits and benefit amounts.', fixable: false },
+    { param: 'income', op: 'lte', value: 250000, label: 'Family income typically below ₹2.5 lakh (varies by scheme)', reason: 'Most NSP scholarships have income ceilings of ₹2 lakh (SC/ST) or ₹2.5 lakh (OBC/Minority). Some post-matric professional course scholarships have higher income limits. Check the specific scheme at scholarships.gov.in.', fixable: false },
+    { param: 'age', op: 'between', value: [6, 30], label: 'Must be a student enrolled in a recognised school or college', reason: 'Pre-matric covers Classes 1–10 (ages ~6–16). Post-matric covers Classes 11 through post-graduation (up to ~30 years). Must be enrolled in a government-recognised institution.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Mandatory — links to bank account for direct payment' },
+    { name: 'Caste Certificate', desc: 'SC/ST/OBC certificate from competent authority — fresh certificate required for each year of application' },
+    { name: 'Income Certificate', desc: 'From Tehsildar or competent authority — showing family income within prescribed limits' },
+    { name: 'Current Year Fee Receipt', desc: 'From school/college showing actual fees paid' },
+    { name: "Bank Account in Student Name", desc: "Aadhaar-linked — scholarship paid directly here" },
+    { name: 'Previous Year Marksheet', desc: 'To prove academic progression and minimum pass marks' }
+  ],
+  steps: [
+    'Visit scholarships.gov.in and register with Aadhaar and mobile number',
+    'Search for schemes applicable to your category (SC/ST/OBC/Minority) and class/course',
+    'Fill the online application before the deadline — usually September to November each year',
+    'Upload: caste certificate, income certificate, fee receipt, marksheet, bank details',
+    'Application is verified by your school/college, then district authority, then state',
+    'Scholarship amount credited directly to your Aadhaar-linked bank account',
+    'Renew every year before the deadline with updated documents'
+  ]
+},
+
+{
+  id: 'pm-kusum',
+  name: 'PM KUSUM — Solar Pump for Farmers',
+  tagline: 'Solar-powered irrigation pump with 60% government subsidy',
+  category: 'Farmers',
+  benefitType: 'subsidy',
+  benefitAmount: '60% subsidy on solar pump (central 30% + state 30%) — pay only 40%',
+  icon: '☀️',
+  iconBg: '#FFF9C4',
+  bgGradient: 'linear-gradient(135deg, #E65100, #FF8F00)',
+  description: 'PM KUSUM (Kisan Urja Suraksha evam Utthaan Mahabhiyan) provides farmers with solar-powered irrigation pumps at 60% subsidy — central government pays 30%, state government pays 30%, and the farmer pays only 40% (which can be taken as a bank loan). A 3HP solar pump costing ₹3.5 lakh would cost the farmer only ₹1.4 lakh (and even less with a loan). Solar pumps eliminate electricity bills for irrigation, work in power-cut areas, and can also feed surplus power to the grid for income. Component A: grid-connected solar plants on barren land. Component B: standalone solar pumps. Component C: solarisation of existing grid pumps.',
+  coverageNote: 'PM KUSUM is implemented by state governments — apply through your state Renewable Energy Development Agency (REDA) or state electricity board. Availability and exact subsidy vary by state. Some states have waiting lists.',
+  applyUrl: 'https://pmkusum.mnre.gov.in',
+  conditions: [
+    { param: 'occupation', op: 'in', value: ['farmer_own', 'farmer_tenant'], label: 'Must be a farmer with irrigation need', reason: 'PM KUSUM is for farmers who need irrigation and currently use diesel pumps or have no reliable electricity. Landless agricultural labourers are not eligible for the solar pump component.', fixable: false },
+    { param: 'hasLand', op: 'eq', value: true, label: 'Must own or lease agricultural land', reason: 'The solar pump is installed on your farm. You need to own or have a lease on the agricultural land where the pump will be installed.', fixable: false },
+    { param: 'area', op: 'eq', value: 'rural', label: 'Must be in a rural or semi-urban agricultural area', reason: 'PM KUSUM is designed for agricultural use in rural areas. Urban households are not eligible.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'For identity and subsidy disbursement' },
+    { name: 'Land Records (Khasra/Patta)', desc: 'Proof of owning or leasing the agricultural land where pump will be installed' },
+    { name: 'Bank Account details', desc: 'For processing subsidy and loan (if applicable)' },
+    { name: 'Photograph of existing pump/water source', desc: 'Shows current irrigation situation — required for application assessment' }
+  ],
+  steps: [
+    'Visit your state Renewable Energy Development Agency (REDA) website or office — each state has its own portal',
+    'Register online and fill the PM KUSUM Component B (standalone solar pump) application',
+    'Submit land records, Aadhaar, and existing irrigation details',
+    'Application verified — you may be placed in a queue (first come first served)',
+    'On approval, select a MNRE-empanelled solar pump vendor from the list',
+    'Pay your 40% share — bank loans available to cover this at low interest',
+    'Vendor installs the solar pump within 120 days',
+    'Solar pump provides free irrigation — no electricity bills, no diesel cost',
+    'For Component A (solar plant on barren land): register with your state DISCOM for power purchase agreement'
+  ]
+},
+
+{
+  id: 'pm-aasha',
+  name: 'PM-AASHA — Farmer Price Protection',
+  tagline: 'Government ensures farmers get Minimum Support Price for their crops',
+  category: 'Farmers',
+  benefitType: 'cash',
+  benefitAmount: 'Full MSP guaranteed — compensation if market price falls below MSP',
+  icon: '🌽',
+  iconBg: '#F9FBE7',
+  bgGradient: 'linear-gradient(135deg, #558B2F, #7CB342)',
+  description: 'PM Annadata Aay SanraksHan Abhiyan (PM-AASHA) ensures farmers receive the Minimum Support Price (MSP) for their crops — protecting them from price crashes. Three components: (1) Price Support Scheme (PSS): government procures oilseeds, pulses, and copra directly at MSP through NAFED when market price falls below MSP. (2) Price Deficiency Payment Scheme (PDPS): if market price falls below MSP, farmers get the difference directly in their bank account — without actually selling to the government. (3) Private Procurement and Stockist Scheme (PPSS): private agencies registered with state government procure at MSP and are compensated. Key crops covered: paddy, wheat, pulses (moong, urad, arhar), oilseeds (groundnut, soybean, sunflower), cotton, sugarcane.',
+  coverageNote: 'MSP is notified by the central government before each sowing season. MSP 2024-25 examples: Paddy ₹2,300/quintal, Wheat ₹2,275/quintal, Groundnut ₹6,783/quintal, Soybean ₹4,892/quintal. Registration at your state mandi/agriculture department is required before selling.',
+  applyUrl: 'https://pmaasha.nic.in',
+  conditions: [
+    { param: 'occupation', op: 'in', value: ['farmer_own', 'farmer_tenant'], label: 'Must be a farmer growing notified MSP crops', reason: 'PM-AASHA is for farmers who grow crops notified under MSP — paddy, wheat, pulses, oilseeds, cotton, and more. Agricultural labourers and non-farming households are not eligible.', fixable: false },
+    { param: 'hasLand', op: 'eq', value: true, label: 'Must have registered farmland', reason: 'Registration under PM-AASHA requires land records (Khasra/Patta) to verify you are growing the crop on registered land. Tenant farmers need a lease agreement.', fixable: true, fixNote: 'Register at your nearest agriculture department office with land records. Tenant farmers can register with a notarised lease agreement.' }
+  ],
+  documents: [
+    { name: 'Land Records (Khasra/Patta)', desc: 'Showing what crop is grown and on how much land' },
+    { name: 'Aadhaar Card', desc: 'For identity and direct bank payment of price deficiency' },
+    { name: 'Bank Account (Aadhaar-linked)', desc: 'Deficiency payment transferred directly to your account' },
+    { name: 'Crop Sowing Declaration', desc: 'Self-declaration or Patwari certificate confirming which crop is sown this season' }
+  ],
+  steps: [
+    'Register at your nearest agriculture department office or at your state mandi board portal',
+    'Declare which crop you are sowing this season and on how much land',
+    'At harvest, check the notified MSP for your crop at pmaasha.nic.in',
+    'Sell at your nearest notified mandi (market yard)',
+    'If market price is above MSP: you receive market price — no action needed',
+    'If market price falls below MSP: register your sale with the mandi',
+    'Under PDPS: difference between MSP and market price credited to your bank account within 3 days',
+    'Under PSS: government procurement agency (NAFED/FCI) buys directly from you at MSP',
+    'Check payments and procurement status at pmaasha.nic.in'
+  ]
+},
+
+{
+  id: 'ayushman-arogya-mandir',
+  name: 'Ayushman Arogya Mandir (AB-HWC)',
+  tagline: 'Free comprehensive healthcare at your nearest Health and Wellness Centre',
+  category: 'Health',
+  benefitType: 'subsidy',
+  benefitAmount: 'Free OPD, medicines, diagnostics, specialist referral — at your doorstep',
+  icon: '🏨',
+  iconBg: '#E0F7FA',
+  bgGradient: 'linear-gradient(135deg, #00695C, #00897B)',
+  description: 'Ayushman Arogya Mandir (formerly Ayushman Bharat Health and Wellness Centres) are upgraded government sub-centres and primary health centres providing free comprehensive primary care — not just maternal and child health. Services: free OPD consultation, free medicines (list of 105 essential drugs), free diagnostics (36 tests including blood sugar, BP, CBC, urine, ECG), screening for 12 conditions (TB, hypertension, diabetes, oral/breast/cervical cancer, mental health), and referral to higher facilities. Over 1.6 lakh centres operational across India. You do not need any card or registration — walk in and get treated.',
+  coverageNote: 'Ayushman Arogya Mandirs are open to ALL citizens — no income or BPL restriction. The centre near you may be called Sub-Centre, PHC (Primary Health Centre), or Health and Wellness Centre. Free medicines are available from the pharmacy at the centre.',
+  applyUrl: 'https://ab-hwc.nhp.gov.in',
+  conditions: [
+    { param: 'area', op: 'eq', value: 'rural', label: 'Primarily for rural and semi-urban populations (though urban HWCs also exist)', reason: 'Most Ayushman Arogya Mandirs are in rural areas — village sub-centres and PHCs upgraded to HWCs. Urban Health and Wellness Centres exist in many cities too. All citizens can access regardless of income.', fixable: false }
+  ],
+  documents: [
+    { name: 'No documents required for walk-in care', desc: 'Any citizen can walk into an Ayushman Arogya Mandir and receive free consultation, free medicines, and free basic diagnostics — no registration, no card needed' },
+    { name: 'Aadhaar Card (optional but helpful)', desc: 'For linking your health records and for referral to secondary/tertiary care hospitals' }
+  ],
+  steps: [
+    'Find your nearest Ayushman Arogya Mandir / Health and Wellness Centre at ab-hwc.nhp.gov.in',
+    'Walk in during OPD hours — no appointment needed, no registration fee',
+    'See the Community Health Officer (CHO) or doctor for consultation',
+    'Receive free prescription — collect free medicines from the on-site pharmacy',
+    'Get free diagnostic tests if prescribed: blood sugar, BP, CBC, ECG, urine test, etc.',
+    'If you need specialist care, the CHO will refer you to a Community Health Centre or district hospital',
+    'Health screening camps for diabetes, hypertension, TB, and cancer are organised regularly — attend when notified',
+    'Your health records are maintained digitally — link with Aadhaar for ABHA (Ayushman Bharat Health Account)'
+  ]
+},
+
+{
+  id: 'pm-jan-arogya-top-up',
+  name: 'PMJAY State Top-Up Schemes',
+  tagline: 'Many states add ₹5–25 lakh extra health cover on top of Ayushman Bharat',
+  category: 'Health',
+  benefitType: 'insurance',
+  benefitAmount: 'Additional ₹5L–₹25L health cover depending on your state',
+  icon: '🏥',
+  iconBg: '#E8F5E9',
+  bgGradient: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+  description: 'Many Indian states have launched their own health insurance schemes on top of Ayushman Bharat PM-JAY, significantly expanding coverage. Key state top-ups: (1) Mukhyamantri Chiranjeevi (Rajasthan): ₹25 lakh/year — covers almost all residents. (2) Aarogyasri (Andhra/Telangana): ₹5–15 lakh — expanded disease list. (3) Mahatma Jyotiba Phule Jan Arogya (Maharashtra): ₹5 lakh. (4) Dr YSR Aarogyasri (AP): ₹5 lakh. (5) Mukhyamantri Amrutum (Gujarat): ₹5 lakh. (6) Chief Minister Comprehensive Health Insurance (Tamil Nadu): ₹5 lakh. These state schemes often cover more hospitals and diseases than PM-JAY alone.',
+  coverageNote: 'If you are already enrolled in PM-JAY (Ayushman Bharat), you may automatically qualify for your state top-up scheme — check at your state health department. Some states use a different Aadhaar-linked card. Eligibility varies widely by state.',
+  applyUrl: 'https://pmjay.gov.in',
+  conditions: [
+    { param: 'rationCard', op: 'in', value: ['AAY (Antyodaya Anna Yojana)', 'BPL', 'NFSA (National Food Security Act)'], label: 'Usually requires BPL or SECC-listed household (varies by state)', reason: 'Most state top-up health schemes use the same eligibility base as PM-JAY — SECC-2011 data and BPL/AAY/NFSA ration card holders. Some states like Rajasthan have expanded to cover nearly all residents.', fixable: true, fixNote: 'Check your state health scheme eligibility at pmjay.gov.in or your state health department portal by entering your Aadhaar or ration card number.' },
+    { param: 'income', op: 'lte', value: 300000, label: 'Household income should be low-to-moderate — targets bottom 40–60% of population', reason: 'State top-up schemes typically cover the same population as PM-JAY or slightly broader. Rajasthan covers almost all — Maharashtra and Gujarat target below ₹3 lakh income households.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Primary identification for all state health schemes' },
+    { name: 'Ration Card (BPL/NFSA/AAY)', desc: 'Helps establish eligibility for state health schemes' },
+    { name: 'Ayushman Card (if already enrolled in PM-JAY)', desc: 'Many state top-ups use the same Ayushman card — show at empanelled hospitals' },
+    { name: 'State-specific Health Card', desc: 'Some states issue their own health card (e.g., Chiranjeevi Card in Rajasthan) — get it from your district hospital or CSC (Common Service Centre)' }
+  ],
+  steps: [
+    'Check PM-JAY eligibility first at pmjay.gov.in — enter Aadhaar or ration card number',
+    'If PM-JAY eligible, visit your state health department portal to check state top-up eligibility',
+    'Get your Ayushman Card made free at any CSC (Common Service Centre), government hospital, or Ayushman Mitra counter',
+    'For state-specific cards (e.g., Chiranjeevi in Rajasthan): apply at your nearest CHC or district hospital',
+    'When hospitalised at an empanelled hospital, show your Ayushman/state health card at admission',
+    'Cashless treatment up to scheme limit — no payment at time of admission or discharge',
+    'For claims above PM-JAY limit, state top-up automatically covers the additional amount'
+  ]
+},
+
+{
+  id: 'e-shram',
+  name: 'e-Shram Portal Registration',
+  tagline: 'Free registration for unorganised workers — ₹2 lakh accident insurance + priority for all schemes',
+  category: 'Employment',
+  benefitType: 'insurance',
+  benefitAmount: '₹2 lakh accident insurance + priority access to all government welfare schemes',
+  icon: '📋',
+  iconBg: '#E3F2FD',
+  bgGradient: 'linear-gradient(135deg, #0D47A1, #1565C0)',
+  description: 'e-Shram is the national database of unorganised workers. Register once and get a permanent e-Shram card (UAN — Universal Account Number) that gives you: (1) Free ₹2 lakh accident insurance under PMSBY for the first year. (2) Priority access to all central government welfare schemes — your registration data is used to identify you for targeted delivery of PM-SYM, MGNREGS, PMEGP, and other benefits. (3) A portable identity card recognised across all states. Over 28 crore workers registered so far. Registration is completely free and takes 5 minutes.',
+  coverageNote: 'e-Shram registration does NOT automatically give you money — it is a registration that makes you eligible and visible for targeted scheme delivery. The ₹2 lakh accident insurance is under PMSBY and is free for the first year.',
+  applyUrl: 'https://eshram.gov.in',
+  conditions: [
+    { param: 'age', op: 'between', value: [16, 59], label: 'Age between 16 and 59 years', reason: 'e-Shram is for working-age unorganised sector workers. Those below 16 or above 59 are excluded from the portal (though they may access other age-specific schemes).', fixable: false },
+    { param: 'occupation', op: 'in', value: ['agri_labourer', 'daily_wage', 'street_vendor', 'artisan', 'homemaker', 'farmer_tenant', 'unemployed', 'farmer_own', 'self_employed'], label: 'Must be an unorganised sector worker NOT covered by EPF/ESIC', reason: 'e-Shram is exclusively for unorganised workers — those not covered by ESIC or EPF. Government employees, formal private sector employees deducting PF/ESI, and income tax payers are excluded.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card linked to mobile number', desc: 'Mandatory — registration is done via Aadhaar OTP' },
+    { name: 'Bank Account details', desc: 'For receiving scheme benefits linked through e-Shram' },
+    { name: 'Mobile Number linked to Aadhaar', desc: 'OTP is sent to this number for verification' }
+  ],
+  steps: [
+    'Visit eshram.gov.in or your nearest CSC (Common Service Centre)',
+    'Click "Register on e-Shram" and enter your Aadhaar number',
+    'OTP sent to your Aadhaar-linked mobile — enter to verify',
+    'Fill in occupation, state, district, and bank account details',
+    'Review and submit — you receive your e-Shram card with UAN (Universal Account Number) instantly',
+    'Download or print your e-Shram card — keep it as a permanent identity document',
+    'Free ₹2 lakh accident insurance active for the first year under PMSBY',
+    'Your data is now linked to government welfare delivery systems — higher chance of being identified for targeted schemes'
+  ]
+}
+,
+
+{
+  id: 'jan-aushadhi',
+  name: 'PM Jan Aushadhi Yojana',
+  tagline: 'Generic medicines at 50–90% cheaper prices at Jan Aushadhi stores',
+  category: 'Health',
+  benefitType: 'subsidy',
+  benefitAmount: 'Medicines at 50–90% below market price at 10,000+ stores nationwide',
+  icon: '💊',
+  iconBg: '#E8F5E9',
+  bgGradient: 'linear-gradient(135deg, #1B5E20, #388E3C)',
+  description: 'PM Jan Aushadhi Yojana (PMJAY) provides high-quality generic medicines at 50–90% lower prices than branded equivalents through a network of over 10,000 Jan Aushadhi Kendras (stores) across India. For example, a branded metformin (diabetes) tablet costing ₹10 costs ₹1 at Jan Aushadhi. A branded cardiac stent costing ₹80,000 is available for ₹7,000. Over 1,900 medicines and 285 surgical items are available. Medicines are manufactured by government-approved facilities and are identical in composition to expensive branded drugs. No income restriction — anyone can buy.',
+  coverageNote: 'Find your nearest Jan Aushadhi Kendra at janaushadhi.gov.in or call 1800-180-8080. Ask your doctor to prescribe generic names (not brand names) so you can purchase from Jan Aushadhi stores. Quality is certified by NABL-accredited labs.',
+  applyUrl: 'https://janaushadhi.gov.in',
+  conditions: [
+    { param: 'income', op: 'lte', value: 1000000, label: 'No income restriction — open to all citizens', reason: 'Jan Aushadhi stores are open to everyone. However, the benefit is greatest for low-income families who cannot afford expensive branded medicines. No registration or card needed — just walk in with your prescription.', fixable: false }
+  ],
+  documents: [
+    { name: "Doctor prescription", desc: "Ask your doctor to prescribe generic names. Jan Aushadhi stores dispense based on generic or brand name both." },
+    { name: 'No registration needed', desc: 'Walk into any Jan Aushadhi Kendra and purchase medicines — no card, no Aadhaar, no formality required.' }
+  ],
+  steps: [
+    'Find nearest Jan Aushadhi Kendra at janaushadhi.gov.in or search "Jan Aushadhi near me"',
+    'Visit the store with your doctor prescription',
+    'Ask for the generic equivalent of your prescribed medicine — store staff will help',
+    'Pay 50–90% less than the branded version — same medicine, same efficacy',
+    'For surgical items like stents, bandages, syringes — also available at deep discounts',
+    'If your medicine is not available, ask the store to order — most items arrive within 2–3 days'
+  ]
+},
+
+{
+  id: 'jal-jeevan-mission',
+  name: 'Jal Jeevan Mission',
+  tagline: 'Free tap water connection to every rural household by 2024',
+  category: 'Housing',
+  benefitType: 'subsidy',
+  benefitAmount: 'Free functional household tap connection (FHTC) — no cost to household',
+  icon: '🚿',
+  iconBg: '#E0F7FA',
+  bgGradient: 'linear-gradient(135deg, #006064, #00838F)',
+  description: 'Jal Jeevan Mission (JJM) aims to provide every rural household with a functional household tap connection (FHTC) — delivering safe drinking water at a minimum 55 litres per person per day. The entire infrastructure (pipeline, tap, water source) is built and paid for by the government — households pay nothing for the connection. Over 14 crore rural households have already received tap connections. The scheme also funds village water supply committees (VWSCs) to manage and maintain local water supply.',
+  coverageNote: 'JJM is demand-driven at the village level — if your village does not have tap connections yet, your Gram Panchayat can prioritise it. The programme is expected to cover all rural households. Urban households have a separate Urban JJM scheme.',
+  applyUrl: 'https://jaljeevanmission.gov.in',
+  conditions: [
+    { param: 'area', op: 'eq', value: 'rural', label: 'Must be a rural household without an existing piped tap connection', reason: 'Jal Jeevan Mission Grameen is exclusively for rural households. If your rural household does not yet have a government tap connection, you are eligible. Urban households are covered under a separate scheme.', fixable: false }
+  ],
+  documents: [
+    { name: 'No individual application needed', desc: 'JJM connections are provided at the village level by Gram Panchayat — all households in the village are covered when the scheme reaches your village' },
+    { name: 'Aadhaar Card', desc: 'For household registration in the JJM database when connection is provided' }
+  ],
+  steps: [
+    'Check if your village is already covered at jaljeevanmission.gov.in — enter your state and district',
+    'If not yet covered: approach your Gram Panchayat and request prioritisation under JJM',
+    'Gram Panchayat forms a Village Water and Sanitation Committee (VWSC) for implementation',
+    'State government engineers survey the village and plan the pipeline and water source',
+    'Connection is provided to every household — no cost to the household',
+    'Once connected, water is supplied through the tap at your home',
+    'Village committee maintains the supply — monthly water tariff (if any) is set by village, usually ₹50–100/month'
+  ]
+},
+
+{
+  id: 'pm-gdi',
+  name: 'PM Gramin Digital Saksharta (PMGDISHA)',
+  tagline: 'Free digital literacy training — learn smartphone, internet, UPI in 20 hours',
+  category: 'Skills & Loans',
+  benefitType: 'training',
+  benefitAmount: 'Free 20-hour digital literacy course + government certificate',
+  icon: '📱',
+  iconBg: '#E3F2FD',
+  bgGradient: 'linear-gradient(135deg, #1565C0, #1976D2)',
+  description: 'PM Gramin Digital Saksharta Abhiyan (PMGDISHA) provides free digital literacy training to one member per rural household — covering basic computer/smartphone use, internet browsing, email, social media, digital payments (UPI, BHIM), and accessing government services online. Training is 20 hours over approximately one week. After completing training and passing an assessment, you receive a government-recognised digital literacy certificate. The scheme targets rural areas specifically — especially women, SC/ST, and BPL households.',
+  coverageNote: 'PMGDISHA training is delivered through Common Service Centres (CSCs) and registered training partners. Find training centres at pmgdisha.in. The scheme has trained over 6 crore people so far.',
+  applyUrl: 'https://www.pmgdisha.in',
+  conditions: [
+    { param: 'area', op: 'eq', value: 'rural', label: 'Must be from a rural household', reason: 'PMGDISHA specifically targets rural households that have never received digital literacy training. Urban households can access NIELIT computer literacy courses instead.', fixable: false },
+    { param: 'age', op: 'between', value: [14, 60], label: 'Age between 14 and 60 years', reason: 'The scheme targets adults and young people who have not previously received digital literacy training. Priority is given to SC/ST, BPL families, women, and persons with disabilities.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Mandatory for registration and certificate issuance' },
+    { name: 'Mobile Number linked to Aadhaar', desc: 'For OTP and progress tracking' }
+  ],
+  steps: [
+    'Visit pmgdisha.in or your nearest Common Service Centre (CSC)',
+    'Register with Aadhaar and mobile number — check if your household has already been covered',
+    'Enroll in the 20-hour digital literacy course at the training centre',
+    'Learn: smartphone basics, internet, email, government portals, UPI/BHIM digital payments',
+    'Appear for the online assessment at the end of training',
+    'Pass the assessment — receive your government digital literacy certificate',
+    'Use your new skills to access government services, do UPI payments, and use the internet'
+  ]
+},
+
+{
+  id: 'icds-anganwadi',
+  name: 'ICDS Anganwadi Services',
+  tagline: 'Free nutrition, health check-ups and pre-school education for children under 6',
+  category: 'Women & Child',
+  benefitType: 'food',
+  benefitAmount: 'Free supplementary nutrition + health check-ups + pre-school daily',
+  icon: '👶',
+  iconBg: '#FCE4EC',
+  bgGradient: 'linear-gradient(135deg, #880E4F, #C2185B)',
+  description: 'Integrated Child Development Services (ICDS) through Anganwadi Centres provides six services free to all children under 6, pregnant women, and lactating mothers: (1) Supplementary nutrition — hot cooked meal or take-home ration every day. (2) Pre-school non-formal education for 3–6 year olds. (3) Immunisation — all government vaccines. (4) Health check-ups — monthly weighing, growth monitoring. (5) Referral to health facilities for sick or malnourished children. (6) Nutrition and health education for mothers. All services are free and universal — no income restriction. Every habitation of 400–800 population should have an Anganwadi Centre.',
+  coverageNote: 'ICDS is universally available — all children under 6 and all pregnant/lactating women qualify regardless of income or caste. Find your nearest Anganwadi at your Gram Panchayat or call your ASHA worker. Over 13 lakh Anganwadi Centres operate across India.',
+  applyUrl: 'https://wcd.nic.in/schemes/icds',
+  conditions: [
+    { param: 'age', op: 'lte', value: 45, label: 'Child must be under 6 years, OR woman must be pregnant or lactating', reason: 'ICDS serves children aged 0–6 years and pregnant/lactating women. All qualifying individuals receive services regardless of income, caste, or location — it is a universal programme.', fixable: false }
+  ],
+  documents: [
+    { name: 'No documents required for walk-in services', desc: 'Any child under 6 or pregnant/lactating woman can walk into the nearest Anganwadi and access all ICDS services — no registration, no card needed' },
+    { name: 'Aadhaar Card (helpful)', desc: 'For linking health records and receiving nutritional supplements through the Poshan Tracker system' }
+  ],
+  steps: [
+    'Find your nearest Anganwadi Centre — ask your ASHA worker or Gram Panchayat',
+    'Walk in with your child or during pregnancy — no prior registration needed',
+    'Register your child name and date of birth with the Anganwadi worker',
+    'Child receives daily supplementary nutrition (hot meal or take-home ration)',
+    'Monthly health check-up: weight, height, and development monitoring',
+    'Children aged 3–6 attend pre-school activities at the Anganwadi every morning',
+    'All government vaccines administered at the Anganwadi on scheduled immunisation days',
+    'Pregnant women receive nutritional supplements and health counselling',
+    'If child is severely malnourished: referred to Nutrition Rehabilitation Centre (NRC) free of cost'
+  ]
+},
+
+{
+  id: 'one-stop-centre',
+  name: 'One Stop Centre (Sakhi)',
+  tagline: 'Free shelter, legal aid, medical, and counselling for women facing violence',
+  category: 'Women & Child',
+  benefitType: 'subsidy',
+  benefitAmount: 'Free shelter (5 days), medical aid, legal aid, counselling, police assistance',
+  icon: '🛡️',
+  iconBg: '#FCE4EC',
+  bgGradient: 'linear-gradient(135deg, #4A148C, #6A1B9A)',
+  description: 'One Stop Centres (OSC), also called Sakhi Centres, provide integrated support to women affected by violence — domestic violence, sexual assault, trafficking, honour-based violence, acid attacks. Services available at one place: (1) Emergency and non-emergency shelter for up to 5 days. (2) Medical examination and treatment. (3) Legal aid and court case support. (4) Police assistance and filing FIR. (5) Psychological counselling. (6) Video conferencing facility for court appearances. Available 24/7. Completely free and confidential. Every district must have at least one OSC. Women of all ages, religions, and income levels can access.',
+  coverageNote: 'OSCs are available in every district of India. Call the Women Helpline 181 to be connected to your nearest OSC. The service is 24/7, free, and confidential. Women can also walk in directly to the OSC at the district hospital or collectorate.',
+  applyUrl: 'https://wcd.nic.in/schemes/one-stop-centre-scheme',
+  conditions: [
+    { param: 'gender', op: 'eq', value: 'female', label: 'Must be a woman or girl affected by violence or in distress', reason: 'One Stop Centres serve women and girls of all ages who are facing or have faced any form of violence — domestic, sexual, workplace harassment, trafficking, child marriage, etc. There is no income or caste restriction.', fixable: false }
+  ],
+  documents: [
+    { name: 'No documents required', desc: 'Women can access OSC services without any documents — especially in emergencies. The centre will help obtain documents if needed.' },
+    { name: 'Aadhaar Card (if available)', desc: 'Helpful for legal proceedings and identity but not mandatory for accessing services' }
+  ],
+  steps: [
+    'Call Women Helpline 181 anytime — available 24/7, connects you to nearest OSC',
+    'Alternatively, walk into the OSC directly — usually located at the district hospital or collectorate',
+    'A case worker will meet you and understand your situation — completely confidential',
+    'Receive immediate medical attention if needed — doctor on call',
+    'Police assistance available on request — FIR can be filed at the OSC with police support',
+    'Legal aid lawyer assigned free of cost for court proceedings',
+    'Shelter available for up to 5 days while you decide next steps',
+    'Psychological counselling provided — ongoing support available',
+    'Referral to long-term shelter homes, skill training, and rehabilitation if needed'
+  ]
+},
+
+{
+  id: 'maulana-azad-scholarship',
+  name: 'Maulana Azad National Fellowship',
+  tagline: 'Full scholarship for Muslim/minority students doing MPhil and PhD',
+  category: 'Education',
+  benefitType: 'cash',
+  benefitAmount: '₹25,000–₹28,000/month + contingency grant for MPhil/PhD students',
+  icon: '🕌',
+  iconBg: '#E8F5E9',
+  bgGradient: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+  description: 'Maulana Azad National Fellowship (MANF) provides full financial support to students from minority communities (Muslims, Christians, Sikhs, Buddhists, Zoroastrians, Jains) pursuing MPhil and PhD in Indian universities. Fellowship amount: ₹25,000/month for JRF (Junior Research Fellow) period (first 2 years), ₹28,000/month for SRF (Senior Research Fellow) period (remaining years). Plus annual contingency grant of ₹10,000 (humanities) or ₹12,000 (sciences). Covers all university fees. Maximum duration: 5 years.',
+  coverageNote: 'MANF is implemented by the University Grants Commission (UGC). Apply through the National Fellowship and Scholarship portal at scholarships.gov.in. Only students admitted to MPhil/PhD programs at recognised universities are eligible.',
+  applyUrl: 'https://scholarships.gov.in',
+  conditions: [
+    { param: 'caste', op: 'in', value: ['OBC', 'General', 'SC', 'ST'], label: 'Must belong to a notified minority community (Muslim, Christian, Sikh, Buddhist, Zoroastrian, Jain)', reason: 'MANF is exclusively for students from the six notified minority communities. All castes within these communities are eligible. There is an income ceiling of ₹6 lakh per year for the family.', fixable: false },
+    { param: 'income', op: 'lte', value: 600000, label: 'Family income must be below ₹6 lakh per year', reason: 'Unlike some minority scholarships, MANF has a ₹6 lakh annual family income ceiling to ensure it reaches those who genuinely need financial support for higher research education.', fixable: false },
+    { param: 'age', op: 'lte', value: 35, label: 'Should be pursuing MPhil/PhD — typically below 35 years', reason: 'MANF is for active MPhil/PhD students enrolled in recognised universities. There is a soft age preference below 35, though the primary requirement is enrollment in a research program.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'For identity and scholarship disbursement' },
+    { name: 'Minority Community Certificate', desc: 'Self-declaration of minority religion is accepted — no separate certificate needed for most applications' },
+    { name: 'MPhil/PhD Admission Letter', desc: 'Proof of enrollment in a recognised university MPhil or PhD program' },
+    { name: 'Income Certificate', desc: 'Showing family income below ₹6 lakh per year' },
+    { name: 'Bank Account (student name, Aadhaar-linked)', desc: 'For monthly fellowship disbursement' }
+  ],
+  steps: [
+    'Get admitted to an MPhil or PhD program at a UGC-recognised university',
+    'Register on scholarships.gov.in — create student account with Aadhaar',
+    'Search for "Maulana Azad National Fellowship" and apply before the deadline (usually July–September)',
+    'Upload admission letter, income certificate, minority declaration, and bank details',
+    'Application reviewed by UGC — selection based on academic merit and income',
+    'If selected, receive ₹25,000/month fellowship deposited directly to your bank account',
+    'Fellowship continues for up to 5 years — renew annually with progress report from supervisor',
+    'Annual contingency grant (₹10,000–₹12,000) for books, fieldwork, and research expenses'
+  ]
+},
+
+{
+  id: 'adip-scheme',
+  name: 'ADIP Scheme — Assistive Devices for Disabled',
+  tagline: 'Free assistive devices for persons with disabilities — hearing aids, wheelchairs, Braille kits',
+  category: 'Health',
+  benefitType: 'subsidy',
+  benefitAmount: 'Free devices worth ₹5,000–₹50,000 depending on disability type',
+  icon: '🦾',
+  iconBg: '#E8EAF6',
+  bgGradient: 'linear-gradient(135deg, #311B92, #4527A0)',
+  description: 'The Assistance to Disabled Persons (ADIP) scheme provides free assistive and adaptive devices to persons with disabilities from low-income households — to enhance their mobility, communication, and daily living. Devices covered: motorised/manual wheelchairs, hearing aids, artificial limbs, tricycles, Braille kits, smart canes for the visually impaired, DAISY players for audio books, communication aids for speech-impaired, and more. Devices are of high quality, sourced from ALIMCO and other approved manufacturers. Distributed through camps organised by ALIMCO and NGOs across districts.',
+  coverageNote: 'ADIP camps are organised periodically at district level. Contact your District Social Welfare Officer or visit alimco.in for upcoming camp schedules. Priority given to children, women, and severely disabled individuals.',
+  applyUrl: 'https://www.alimco.in/adip.aspx',
+  conditions: [
+    { param: 'income', op: 'lte', value: 200000, label: 'Family income must be below ₹2 lakh per year', reason: 'ADIP is for persons with disabilities from low-income households. Income ceiling is ₹2 lakh per year (₹20,000/month). Above this income, persons can avail devices at subsidised rates (not free).', fixable: false },
+    { param: 'age', op: 'gte', value: 0, label: 'Any age — children and adults both covered', reason: 'ADIP covers all age groups — from children with disabilities to elderly. Special devices for children (like hearing aids, communication boards) and adults (wheelchairs, artificial limbs) are available.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'For identity verification' },
+    { name: 'Disability Certificate', desc: 'From a government-recognised medical authority showing type and percentage of disability — minimum 40% disability required' },
+    { name: 'Income Certificate', desc: 'From Tehsildar showing family income below ₹2 lakh per year' },
+    { name: 'Age Proof', desc: 'Birth certificate or Aadhaar — especially important for children' },
+    { name: 'Photograph', desc: 'Passport-size photo for camp registration' }
+  ],
+  steps: [
+    'Get a Disability Certificate from a government medical board — shows type and % of disability',
+    'Check upcoming ADIP/ALIMCO camps in your district at alimco.in or contact District Social Welfare Officer',
+    'Register at the camp with disability certificate, Aadhaar, income certificate, and photograph',
+    'Medical team at camp assesses your disability and prescribes the appropriate device',
+    'Device is fitted and handed over at the camp — free of cost for income below ₹2 lakh',
+    'Follow-up fitting and adjustment support provided',
+    'For motorised wheelchairs and advanced devices: apply separately through ALIMCO district office'
+  ]
+},
+
+{
+  id: 'nps-lite',
+  name: 'NPS Lite / Swavalamban',
+  tagline: 'Low-cost pension plan for unorganised workers — government contributes ₹1,000/year',
+  category: 'Pension',
+  benefitType: 'pension',
+  benefitAmount: 'Market-linked pension corpus + ₹1,000/year government co-contribution',
+  icon: '📊',
+  iconBg: '#FFF8E1',
+  bgGradient: 'linear-gradient(135deg, #E65100, #BF360C)',
+  description: 'NPS Lite (Swavalamban) is the simplified version of the National Pension System for low-income unorganised sector workers. Government co-contributes ₹1,000/year to your pension account for up to 5 years. Unlike APY (which gives a fixed guaranteed pension), NPS Lite is market-linked — your final pension depends on investment returns. Minimum annual contribution: ₹1,000. No maximum. You can start with as little as ₹100/month. At 60, you must use 40% of the corpus to buy an annuity (monthly pension) and can withdraw 60% as lump sum. Lower fees than regular NPS.',
+  coverageNote: 'NPS Lite is suitable if you want to contribute more than APY allows or want flexibility in contribution amounts. If you are between 18–40 and want a GUARANTEED pension, APY is better. NPS Lite suits those who want a flexible, market-linked pension with government co-contribution.',
+  applyUrl: 'https://npscra.nsdl.co.in/nps-lite.php',
+  conditions: [
+    { param: 'age', op: 'between', value: [18, 60], label: 'Age between 18 and 60 years', reason: 'NPS Lite is open until age 60 — broader than APY (which closes at 40). This makes it accessible to older workers who missed the APY enrollment window.', fixable: false },
+    { param: 'income', op: 'lte', value: 200000, label: 'Should be from low-income unorganised sector — income below ₹2 lakh/year for government co-contribution', reason: 'The ₹1,000/year government co-contribution (Swavalamban benefit) was available for those with income below ₹2 lakh. New enrollments now get the APY scheme instead, but existing NPS Lite accounts continue with co-contribution.', fixable: false },
+    { param: 'hasBankAccount', op: 'custom', value: true, label: 'Must have a bank account for contributions and corpus withdrawal', reason: 'NPS Lite contributions are made through banks and business correspondents. The final pension corpus is paid to your bank account at retirement.', fixable: true, fixNote: 'Open a Jan Dhan savings account at any bank — you can enroll for NPS Lite through the same bank or a CSC (Common Service Centre).' }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'Mandatory for enrollment and KYC' },
+    { name: 'Bank Account details', desc: 'For contribution and corpus disbursement' },
+    { name: 'Photograph', desc: 'Passport-size photo for account records' },
+    { name: 'Mobile Number', desc: 'For account alerts and annual statements' }
+  ],
+  steps: [
+    'Visit your nearest bank, Post Office, or CSC (Common Service Centre)',
+    'Ask for NPS Lite enrollment form',
+    'Fill Aadhaar, bank details, and nominee information',
+    'Make initial contribution — minimum ₹100',
+    'Receive your Permanent Retirement Account Number (PRAN)',
+    'Make contributions as and when you can — minimum ₹1,000/year to keep account active',
+    'Government credits ₹1,000/year co-contribution for eligible years',
+    'At 60: use 40% corpus to buy monthly pension (annuity), withdraw 60% as lump sum'
+  ]
+},
+
+{
+  id: 'pradhan-mantri-awas-gramin-plus',
+  name: 'PM Awas+ (PMAY-G Awaiting List)',
+  tagline: 'Get added to housing waitlist if missed in SECC-2011 survey',
+  category: 'Housing',
+  benefitType: 'cash',
+  benefitAmount: '₹1.2–₹1.3 lakh housing grant (plains) or ₹1.3 lakh (hilly/difficult areas)',
+  icon: '📝',
+  iconBg: '#FFF3E0',
+  bgGradient: 'linear-gradient(135deg, #E65100, #F57C00)',
+  description: 'Many genuinely homeless and kutcha-house families were missed in the SECC-2011 survey and are not on the PMAY-G waiting list — leaving them ineligible for the ₹1.2 lakh housing grant despite being genuinely deserving. PM Awas+ (PMAY-G New Survey) was launched to add missed households. States periodically conduct fresh surveys using the Awaas+ app to identify and add eligible families missed earlier. If your family is homeless or living in a severely dilapidated house but not on the PMAY-G list, you can apply to be added through your Gram Panchayat.',
+  coverageNote: 'This is not a separate scheme — it is a mechanism to get added to PMAY-G if you were missed. Contact your Gram Panchayat or Block Development Officer (BDO) with proof of your housing condition. Fresh survey rounds add new beneficiaries every year.',
+  applyUrl: 'https://pmayg.nic.in',
+  conditions: [
+    { param: 'area', op: 'eq', value: 'rural', label: 'Must be a rural household currently homeless or living in a kutcha house', reason: 'This is for rural households who are genuinely homeless or living in severely inadequate housing but were missed in the SECC-2011 survey. If you already have a pucca house, you are not eligible.', fixable: false },
+    { param: 'income', op: 'lte', value: 200000, label: 'Must be from a low-income household — typically BPL', reason: 'Priority for inclusion in the fresh survey is given to the poorest households — SC/ST, widows, persons with disabilities, released bonded labour, and those with the worst housing conditions.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'For identity and bank transfer of housing grant' },
+    { name: 'Photograph of current house/shelter', desc: 'Proof of kutcha or no house — Gram Panchayat may visit to verify' },
+    { name: 'BPL/Ration Card', desc: 'To establish low-income status' },
+    { name: 'Bank Account (Aadhaar-linked)', desc: 'Housing grant of ₹1.2–1.3 lakh disbursed in instalments to your account' }
+  ],
+  steps: [
+    'Visit your Gram Panchayat office and explain you are not on the PMAY-G list but live in a kutcha/no house',
+    'Request to be included in the fresh Awaas+ survey',
+    'Gram Panchayat surveyor visits your home and takes geotagged photographs',
+    'Application submitted to Block Development Officer (BDO (Block Development Officer)) for approval',
+    'If approved: your name added to PMAY-G waiting list in the Awaas Soft portal',
+    'Once funds are allocated to your name, first instalment of ₹25,000–₹40,000 released to your bank account',
+    'Construct foundation — submit geotagged photos to unlock next instalment',
+    'Continue construction in stages — full grant of ₹1.2–1.3 lakh released on completion'
+  ]
+},
+
+{
+  id: 'seekho-kamao',
+  name: 'Seekho Aur Kamao (Minorities)',
+  tagline: 'Free skill training + ₹10,000/month stipend for minority youth',
+  category: 'Skills & Loans',
+  benefitType: 'training',
+  benefitAmount: 'Free skill training + ₹10,000/month stipend + placement support',
+  icon: '🧵',
+  iconBg: '#E8F5E9',
+  bgGradient: 'linear-gradient(135deg, #004D40, #00695C)',
+  description: 'Seekho Aur Kamao (Learn and Earn) is a skill development scheme exclusively for youth from minority communities (Muslims, Christians, Sikhs, Buddhists, Zoroastrians, Jains) — providing free market-oriented skill training in traditional and modern trades. Training duration: 3–12 months. Stipend: ₹10,000/month (80% from government, 20% from training partner) paid during training. Placement support after training. Trades: apparel, food processing, leather, electronic appliances, IT, healthcare, hospitality, gem and jewellery. Special focus on modernising traditional crafts of minority communities.',
+  coverageNote: 'Seekho Aur Kamao targets youth aged 14–45 from minority communities. It is especially beneficial for those in traditional crafts (weaving, embroidery, pottery) who want to upgrade skills and earn better. Apply through your Minority Welfare Department or at minorityaffairs.gov.in.',
+  applyUrl: 'https://minorityaffairs.gov.in/seekho-aur-kamao',
+  conditions: [
+    { param: 'caste', op: 'in', value: ['OBC', 'General', 'SC', 'ST'], label: 'Must belong to a notified minority community (Muslim, Christian, Sikh, Buddhist, Zoroastrian, Jain)', reason: 'Seekho Aur Kamao is exclusively for youth from the six notified minority communities. All income levels within these communities are eligible, but priority is given to those below the poverty line.', fixable: false },
+    { param: 'age', op: 'between', value: [14, 45], label: 'Age between 14 and 45 years', reason: 'Targets youth and young adults from minority communities who are looking for skill training and employment opportunities. Above 45, other skill schemes may be more suitable.', fixable: false }
+  ],
+  documents: [
+    { name: 'Aadhaar Card', desc: 'For identity and stipend payment' },
+    { name: 'Minority Community Certificate or Self-Declaration', desc: 'Declaring you belong to a notified minority religion' },
+    { name: 'Educational Certificate', desc: 'Whatever you have — no minimum education required for most trades' },
+    { name: 'Bank Account (Aadhaar-linked)', desc: 'For monthly stipend of ₹10,000 during training' }
+  ],
+  steps: [
+    'Visit your state Minority Welfare Department or check minorityaffairs.gov.in for registered training centres',
+    'Find a training partner near you offering a trade of your choice',
+    'Register and enroll — submit Aadhaar, minority declaration, and educational certificates',
+    'Attend training (3–12 months) — ₹10,000/month stipend deposited to your bank account',
+    'Complete training and appear for assessment',
+    'Receive skill certificate recognised by the National Skill Development Corporation (NSDC)',
+    'Training partner provides job placement support — minimum 70% of trained youth must be placed'
   ]
 }
 
@@ -833,6 +2152,26 @@ const QUESTIONS = [
       { value: false, label: 'No', emoji: '❌' },
       { value: true, label: 'Yes', emoji: '✅' }
     ]
+  },
+  {
+    id: 'hasGirlChild',
+    question: 'Do you have a daughter below 10 years of age?',
+    hint: 'Required for Sukanya Samriddhi Yojana and Beti Bachao Beti Padhao',
+    type: 'options',
+    options: [
+      { value: false, label: 'No', emoji: '❌' },
+      { value: true, label: 'Yes — I have a daughter below 10', emoji: '👧' }
+    ]
+  },
+  {
+    id: 'hasSchoolChild',
+    question: 'Do you have a child studying in a government school (Classes 1–8)?',
+    hint: 'Required for PM Poshan (Mid-Day Meal) scheme eligibility',
+    type: 'options',
+    options: [
+      { value: false, label: 'No', emoji: '❌' },
+      { value: true, label: 'Yes — child is in a government school', emoji: '🏫' }
+    ]
   }
 ];
 
@@ -898,6 +2237,16 @@ function checkEligibility(scheme, profile) {
       if (profile.hasBankAccount !== undefined) status = toBool(profile.hasBankAccount) ? 'pass' : 'fail';
     } else if (cond.param === 'pregnant_applicable') {
       if (profile.pregnant !== undefined) status = toBool(profile.pregnant) ? 'pass' : 'fail';
+    } else if (cond.param === 'hasBankAccount') {
+      if (profile.hasBankAccount !== undefined) status = toBool(profile.hasBankAccount) ? 'pass' : 'fail';
+    } else if (cond.param === 'hasGirlChild') {
+      if (profile.hasGirlChild !== undefined) status = toBool(profile.hasGirlChild) ? 'pass' : 'fail';
+    } else if (cond.param === 'hasSchoolChild') {
+      if (profile.hasSchoolChild !== undefined) status = toBool(profile.hasSchoolChild) ? 'pass' : 'fail';
+    } else if (cond.param === 'not_prev_beneficiary') {
+      status = 'unknown';
+    } else if (cond.param === 'not_defaulter') {
+      status = 'unknown';
     } else {
       // All custom/unknown conditions remain unknown
       status = 'unknown';
@@ -940,17 +2289,106 @@ function renderSchemeCard(scheme) {
 }
 
 function initHome() {
-  const el = document.getElementById('all-schemes-home');
-  if (el) el.innerHTML = SCHEMES.map(s => renderSchemeCard(s)).join('');
+  const grid = document.getElementById('home-cat-grid');
+  if (!grid) return;
+  const rows = CATEGORIES.map(cat => {
+    const count = SCHEMES.filter(s => s.category === cat.name).length;
+    if (count === 0) return '';
+    return `<div class="cat-card" onclick="openHomeCategory('${cat.name}')" style="border-top:3px solid ${cat.border}">
+      <div class="cat-icon">${cat.icon}</div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-count">${count} scheme${count !== 1 ? 's' : ''}</div>
+    </div>`;
+  }).join('');
+  grid.innerHTML = '<div class="cat-grid">' + rows + '</div>';
+}
+
+function openHomeCategory(catName) {
+  const cat = CATEGORIES.find(c => c.name === catName);
+  const schemes = SCHEMES.filter(s => s.category === catName);
+  document.getElementById('home-cat-grid').style.display = 'none';
+  document.getElementById('home-cat-schemes').style.display = 'block';
+  document.getElementById('home-cat-title').innerHTML = (cat ? cat.icon + ' ' : '') + catName;
+  document.getElementById('home-cat-scheme-list').innerHTML = schemes.map(s => renderSchemeCard(s)).join('');
+  window.scrollTo({ top: document.getElementById('home-cat-schemes').offsetTop - 80, behavior: 'smooth' });
+}
+
+function closeHomeCategoryView() {
+  document.getElementById('home-cat-grid').style.display = 'block';
+  document.getElementById('home-cat-schemes').style.display = 'none';
+}
+
+// Category definitions
+const CATEGORIES = [
+  { name: 'Farmers', icon: '🌾', color: '#E8F5E9', border: '#4CAF50' },
+  { name: 'Health', icon: '🏥', color: '#FCE4EC', border: '#E91E63' },
+  { name: 'Housing', icon: '🏠', color: '#E3F2FD', border: '#1976D2' },
+  { name: 'Pension', icon: '👴', color: '#EDE7F6', border: '#7B1FA2' },
+  { name: 'Skills & Loans', icon: '💼', color: '#FFF3E0', border: '#F57C00' },
+  { name: 'Women & Child', icon: '👩', color: '#FCE4EC', border: '#C2185B' },
+  { name: 'Education', icon: '📚', color: '#E0F7FA', border: '#0097A7' },
+  { name: 'Financial Services', icon: '🏦', color: '#F3E5F5', border: '#8E24AA' },
+  { name: 'Employment', icon: '⛏️', color: '#FFF8E1', border: '#F9A825' },
+  { name: 'Food & Essentials', icon: '🍱', color: '#E8F5E9', border: '#388E3C' },
+];
+
+function initBrowse() {
+  const grid = document.getElementById('browse-category-grid');
+  if (!grid) return;
+  grid.innerHTML = CATEGORIES.map(cat => {
+    const count = SCHEMES.filter(s => s.category === cat.name).length;
+    if (count === 0) return '';
+    return `<div class="cat-card" onclick="openCategory('${cat.name}')" style="border-color:${cat.border}20">
+      <div class="cat-icon">${cat.icon}</div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-count">${count} scheme${count !== 1 ? 's' : ''}</div>
+    </div>`;
+  }).join('');
+  // Wrap in grid div
+  grid.innerHTML = '<div class="cat-grid">' + grid.innerHTML + '</div>';
+}
+
+function openCategory(catName) {
+  const cat = CATEGORIES.find(c => c.name === catName);
+  const schemes = SCHEMES.filter(s => s.category === catName);
+  document.getElementById('browse-category-grid').style.display = 'none';
+  document.getElementById('browse-category-schemes').style.display = 'block';
+  document.getElementById('browse-category-title').innerHTML = (cat ? cat.icon + ' ' : '') + catName;
+  document.getElementById('browse-category-scheme-list').innerHTML = schemes.map(s => renderSchemeCard(s)).join('');
+  document.getElementById('scheme-search').value = '';
+  document.getElementById('browse-search-results').style.display = 'none';
+}
+
+function closeCategoryView() {
+  document.getElementById('browse-category-grid').style.display = 'block';
+  document.getElementById('browse-category-schemes').style.display = 'none';
+  document.getElementById('browse-search-results').style.display = 'none';
+  document.getElementById('scheme-search').value = '';
 }
 
 function filterSchemes(val) {
-  const lower = (val || '').toLowerCase();
-  const filtered = lower
-    ? SCHEMES.filter(s => s.name.toLowerCase().includes(lower) || s.tagline.toLowerCase().includes(lower) || s.category.toLowerCase().includes(lower) || s.description.toLowerCase().includes(lower))
-    : SCHEMES;
-  const el = document.getElementById('browse-schemes');
-  if (el) el.innerHTML = filtered.length ? filtered.map(s => renderSchemeCard(s)).join('') : '<p style="color:var(--slate);text-align:center;padding:40px">No schemes found.</p>';
+  const lower = (val || '').toLowerCase().trim();
+  const resultsEl = document.getElementById('browse-search-results');
+  const gridEl = document.getElementById('browse-category-grid');
+  const catEl = document.getElementById('browse-category-schemes');
+  if (!lower) {
+    resultsEl.style.display = 'none';
+    gridEl.style.display = 'block';
+    catEl.style.display = 'none';
+    return;
+  }
+  const filtered = SCHEMES.filter(s =>
+    s.name.toLowerCase().includes(lower) ||
+    s.tagline.toLowerCase().includes(lower) ||
+    s.category.toLowerCase().includes(lower) ||
+    s.description.toLowerCase().includes(lower)
+  );
+  gridEl.style.display = 'none';
+  catEl.style.display = 'none';
+  resultsEl.style.display = 'block';
+  resultsEl.innerHTML = filtered.length
+    ? `<p style="font-size:13px;color:var(--slate);margin-bottom:12px">${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${val}"</p>` + filtered.map(s => renderSchemeCard(s)).join('')
+    : '<p style="color:var(--slate);text-align:center;padding:40px">No schemes found.</p>';
 }
 
 // ============================================================
@@ -1198,7 +2636,7 @@ function showSchemeDetail(schemeId) {
           <div class="paywall-overlay">
             <div class="paywall-lock">🔒</div>
             <div class="paywall-title">Unlock Your Eligibility Report</div>
-            <div class="paywall-sub">See exactly which conditions you pass or fail — with tips to fix gaps. ₹29 for all 10 schemes this session.</div>
+            <div class="paywall-sub">See exactly which conditions you pass or fail — with tips to fix gaps. ₹29 for all 40 schemes this session.</div>
             <button class="paywall-btn" onclick="unlockPaywall('${schemeId}')">Unlock for ₹29 →</button>
             <div class="paywall-note">One-time per session · Powered by Razorpay</div>
           </div>
@@ -1228,7 +2666,7 @@ function showSchemeDetail(schemeId) {
         <div class="paywall-overlay">
           <div class="paywall-lock">🔒</div>
           <div class="paywall-title">Unlock How to Apply</div>
-          <div class="paywall-sub">Get step-by-step application guide for all 10 schemes this session.</div>
+          <div class="paywall-sub">Get step-by-step application guide for all 40 schemes this session.</div>
           <button class="paywall-btn" onclick="unlockPaywall('${schemeId}')">Unlock for ₹29 →</button>
           <div class="paywall-note">One-time per session · Powered by Razorpay</div>
         </div>
@@ -1290,7 +2728,7 @@ function showPage(page) {
   const el = document.getElementById(`page-${page}`);
   if (el) el.classList.add('active');
   window.scrollTo(0, 0);
-  if (page === 'browse') filterSchemes('');
+  if (page === 'browse') { document.getElementById('scheme-search').value = ''; if(typeof closeCategoryView === 'function') closeCategoryView(); initBrowse(); }
   if (page === 'home') initHome();
   if (page !== 'results') fromResults = false;
   if (page !== 'detail') {
