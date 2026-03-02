@@ -227,7 +227,7 @@
   .cat-card.active { border-color: var(--saffron); background: #FFF8F0; }
   @media(min-width:600px){ .cat-grid { grid-template-columns: repeat(3, 1fr); } }
 </style>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
 </head>
 <body>
 
@@ -2183,6 +2183,24 @@ let currentStep = 0;
 let fromResults = false;
 let paywallUnlocked = false;
 
+// State persistence across reloads
+function saveState() {
+  try {
+    localStorage.setItem('yss', JSON.stringify({ userProfile, currentStep, paywallUnlocked }));
+  } catch(e) {}
+}
+function loadState() {
+  try {
+    const s = localStorage.getItem('yss');
+    if (s) {
+      const d = JSON.parse(s);
+      if (d.userProfile) userProfile = d.userProfile;
+      if (d.currentStep) currentStep = d.currentStep;
+      if (d.paywallUnlocked) paywallUnlocked = d.paywallUnlocked;
+    }
+  } catch(e) {}
+}
+
 // ============================================================
 // ELIGIBILITY ENGINE
 // ============================================================
@@ -2405,6 +2423,8 @@ function resetQuestionnaire() {
   currentStep = 0;
   userProfile = {};
   paywallUnlocked = false;
+  saveState();
+  paywallUnlocked = false;
   syncRefreshBtn();
   showPage('quiz');
   renderQuestion();
@@ -2464,6 +2484,7 @@ function selectOption(btn) {
   else if (value === "false") value = false;
   else if (!isNaN(value) && value !== "") value = Number(value);
   userProfile[id] = value;
+  saveState();
   syncRefreshBtn();
   document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
   btn.classList.add("selected");
@@ -2471,12 +2492,12 @@ function selectOption(btn) {
 }
 
 function nextStep() {
-  if (currentStep < QUESTIONS.length - 1) { currentStep++; renderQuestion(); }
+  if (currentStep < QUESTIONS.length - 1) { currentStep++; saveState(); renderQuestion(); }
   else showResults();
 }
 
 function prevStep() {
-  if (currentStep > 0) { currentStep--; renderQuestion(); }
+  if (currentStep > 0) { currentStep--; saveState(); renderQuestion(); }
 }
 
 // ============================================================
@@ -2554,6 +2575,7 @@ function unlockPaywall(schemeId) {
     handler: function(response) {
       // Payment successful — unlock for this session
       paywallUnlocked = true;
+  saveState();
       showSchemeDetail(schemeId);
     },
     prefill: {},
@@ -2565,6 +2587,10 @@ function unlockPaywall(schemeId) {
       }
     }
   };
+  if (typeof Razorpay === 'undefined') {
+    alert('Payment service is loading, please try again in a moment.');
+    return;
+  }
   const rzp = new Razorpay(options);
   rzp.on('payment.failed', function(response) {
     alert('Payment failed. Please try again.');
@@ -2737,11 +2763,30 @@ function showPage(page) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  loadState();
   syncRefreshBtn();
   initHome();
   const hash = window.location.hash.replace('#', '');
-  if (hash && hash !== 'detail' && document.getElementById(`page-${hash}`)) showPage(hash);
-  else showPage('home');
+  if (hash && hash !== 'detail' && document.getElementById(`page-${hash}`)) {
+    // For quiz page on reload: restore to where they left off
+    if (hash === 'quiz' && currentStep > 0) {
+      showPage('quiz');
+      renderQuestion();
+    }
+    // For results page on reload: only show if we have answers
+    else if (hash === 'results' && Object.keys(userProfile).length > 0) {
+      showPage('results');
+      showResults();
+    }
+    else if (hash === 'quiz' || hash === 'results') {
+      showPage('home');
+    }
+    else {
+      showPage(hash);
+    }
+  } else {
+    showPage('home');
+  }
 });
 
 // Event delegation for static buttons (required for sandboxed iframe)
